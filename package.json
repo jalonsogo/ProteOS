@@ -1,0 +1,21 @@
+{
+  "name": "whaleos",
+  "version": "1.0.0",
+  "description": "Desktop OS-like web UI for managing containerized Claude Code instances",
+  "main": "server/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js"
+  },
+  "keywords": ["docker", "claude-code", "web-os", "terminal"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "dockerode": "^4.0.2",
+    "ws": "^8.16.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5"
+  }
+}

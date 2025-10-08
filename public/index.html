@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhaleOS - Claude Code Desktop</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Desktop Background -->
+    <div class="desktop">
+        <!-- Desktop Icons -->
+        <div class="desktop-icons">
+            <div class="desktop-icon" id="claude-icon" title="Launch Claude Code Terminal">
+                <div class="icon-image">🐋</div>
+                <div class="icon-label">Claude Code</div>
+            </div>
+            <div class="desktop-icon" id="files-icon" title="Browse Container Files">
+                <div class="icon-image">📁</div>
+                <div class="icon-label">Files</div>
+            </div>
+            <div class="desktop-icon" id="about-icon" title="About WhaleOS">
+                <div class="icon-image">ℹ️</div>
+                <div class="icon-label">About</div>
+            </div>
+        </div>
+
+        <!-- Taskbar -->
+        <div class="taskbar">
+            <div class="taskbar-left">
+                <div class="start-button">
+                    <span class="whale-logo">🐋</span>
+                    <span>WhaleOS</span>
+                </div>
+                <div class="taskbar-apps" id="taskbar-apps"></div>
+            </div>
+            <div class="taskbar-right">
+                <div class="system-tray">
+                    <span class="tray-item" id="container-count">Containers: 0</span>
+                    <span class="tray-item" id="clock">00:00</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Window Container -->
+    <div id="windows-container"></div>
+
+    <!-- About Modal -->
+    <div class="modal" id="about-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>About WhaleOS</h2>
+                <button class="modal-close" data-modal="about">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="about-logo">🐋</div>
+                <h3>WhaleOS v1.0</h3>
+                <p>A desktop OS-like web interface for managing containerized Claude Code instances.</p>
+                <p><strong>Features:</strong></p>
+                <ul>
+                    <li>Spawn multiple Claude Code containers</li>
+                    <li>Web-based terminal access</li>
+                    <li>Window management system</li>
+                    <li>Docker container lifecycle management</li>
+                    <li>Persistent file storage</li>
+                </ul>
+                <p class="about-footer">Built with Docker, Node.js, and ttyd</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- File Browser Modal -->
+    <div class="modal" id="files-modal">
+        <div class="modal-content file-browser-modal">
+            <div class="modal-header">
+                <h2>📁 Container Files</h2>
+                <button class="modal-close" data-modal="files">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="container-selector">
+                    <label>Select Container:</label>
+                    <select id="file-browser-container-select"></select>
+                </div>
+                <div class="file-browser">
+                    <div class="file-path">
+                        <button class="path-back-btn" title="Go back">⬅️</button>
+                        <span id="current-path">/</span>
+                    </div>
+                    <div class="file-list" id="file-list">
+                        <div class="loading">Loading files...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- File Viewer Modal -->
+    <div class="modal" id="file-viewer-modal">
+        <div class="modal-content file-viewer-modal">
+            <div class="modal-header">
+                <h2 id="file-viewer-title">📄 File Viewer</h2>
+                <button class="modal-close" data-modal="file-viewer">&times;</button>
+            </div>
+            <div class="modal-body">
+                <pre id="file-content"></pre>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
