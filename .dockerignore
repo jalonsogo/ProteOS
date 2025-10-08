@@ -1,0 +1,35 @@
+# Node modules
+node_modules/
+npm-debug.log*
+package-lock.json
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Documentation
+*.md
+!README.md
+
+# Workspace (will be mounted as volume)
+workspace/
+
+# Claude
+.claude/
+
+# Build artifacts
+*.log
+logs/

@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  whaleos:
+    build: .
+    container_name: whaleos
+    ports:
+      - "3000:3000"
+    volumes:
+      # Mount Docker socket to manage containers (Docker-in-Docker approach)
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Persistent workspace for container files
+      - ./workspace:/workspace
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - PORT=3000
+    restart: unless-stopped
+    networks:
+      - whaleos-network
+
+networks:
+  whaleos-network:
+    driver: bridge

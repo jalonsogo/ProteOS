@@ -1,45 +1,37 @@
-# Smallest working image - Alpine with native ttyd
+# WhaleOS - Containerized Distribution
+# This container runs the WhaleOS server and manages Docker containers via Docker socket
 FROM node:20-alpine
 
-# Add edge community repo for ttyd and install minimal packages
-RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories && \
-    apk add --no-cache \
-    ttyd \
-    bash \
-    git \
-    && rm -rf /var/cache/apk/*
+# Install Docker CLI (not Docker daemon - we'll use host's Docker via socket)
+RUN apk add --no-cache docker-cli git
 
-# Install Claude Code with production flag to minimize size
-RUN npm install -g @anthropic-ai/claude-code --production --no-audit --no-fund && \
-    npm cache clean --force && \
-    rm -rf /tmp/* /root/.npm
+# Set working directory
+WORKDIR /app
 
-# Create startup script that properly maintains the session
-RUN echo '#!/bin/bash' > /start.sh && \
-    echo 'if [ -z "$ANTHROPIC_API_KEY" ]; then' >> /start.sh && \
-    echo '  echo "Error: Set ANTHROPIC_API_KEY environment variable"' >> /start.sh && \
-    echo '  echo "Exiting..."' >> /start.sh && \
-    echo '  sleep 5' >> /start.sh && \
-    echo '  exit 1' >> /start.sh && \
-    echo 'fi' >> /start.sh && \
-    echo '' >> /start.sh && \
-    echo 'echo "Claude Code ready at http://localhost:7681"' >> /start.sh && \
-    echo 'echo ""' >> /start.sh && \
-    echo 'echo "Available commands:"' >> /start.sh && \
-    echo 'echo "  claude-code help    - Show help"' >> /start.sh && \
-    echo 'echo "  claude-code chat    - Start chat"' >> /start.sh && \
-    echo 'echo "  claude-code edit    - Edit files"' >> /start.sh && \
-    echo 'echo ""' >> /start.sh && \
-    chmod +x /start.sh
+# Copy package files
+COPY package*.json ./
 
-# Set proper environment for interactive terminal
-ENV TERM=xterm-256color
-ENV SHELL=/bin/bash
+# Install dependencies
+RUN npm ci --production
 
-EXPOSE 7681
-WORKDIR /workspace
+# Copy application files
+COPY server/ ./server/
+COPY public/ ./public/
+COPY dockerfile* ./
 
-# Use ttyd with proper options for interactive terminal
-# -W: Allow write permissions (keyboard input)
-# -t: Terminal options
-CMD ["ttyd", "-W", "-p", "7681", "-t", "titleFixed=Claude Code Terminal", "-t", "theme={'background':'#1e1e1e','foreground':'#ffffff'}", "/bin/bash", "-il", "-c", "source /start.sh; exec bash -i"]
+# Create workspace directory
+RUN mkdir -p /workspace/containers
+
+# Expose port
+EXPOSE 3000
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV PORT=3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3000', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+
+# Start the application
+CMD ["node", "server/index.js"]
