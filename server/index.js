@@ -25,30 +25,64 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(join(__dirname, '../public')));
 
-// Build the Claude Code Docker image if it doesn't exist
-async function ensureImageExists() {
+// Image configurations
+const imageConfigs = {
+  claude: {
+    name: 'whaleos-claude',
+    dockerfile: 'dockerfile',
+    env: 'ANTHROPIC_API_KEY'
+  },
+  gemini: {
+    name: 'whaleos-gemini',
+    dockerfile: 'dockerfile.gemini',
+    env: 'GEMINI_API_KEY'
+  },
+  openai: {
+    name: 'whaleos-openai',
+    dockerfile: 'dockerfile.openai',
+    env: 'OPENAI_API_KEY'
+  }
+};
+
+// Build Docker images if they don't exist
+async function ensureImageExists(type) {
+  const config = imageConfigs[type];
   try {
-    await docker.getImage('whaleos-claude').inspect();
-    console.log('✓ WhaleOS Claude image exists');
+    await docker.getImage(config.name).inspect();
+    console.log(`✓ ${config.name} image exists`);
   } catch (error) {
-    console.log('Building WhaleOS Claude image...');
+    console.log(`Building ${config.name} image...`);
     const stream = await docker.buildImage({
       context: join(__dirname, '..'),
-      src: ['dockerfile', '.env']
-    }, { t: 'whaleos-claude' });
+      src: [config.dockerfile, '.env']
+    }, { t: config.name, dockerfile: config.dockerfile });
 
     await new Promise((resolve, reject) => {
       docker.modem.followProgress(stream, (err, res) => err ? reject(err) : resolve(res));
     });
-    console.log('✓ WhaleOS Claude image built');
+    console.log(`✓ ${config.name} image built`);
   }
 }
 
-// Create a new Claude Code container
+// Ensure all images exist
+async function ensureAllImages() {
+  await ensureImageExists('claude');
+  await ensureImageExists('gemini');
+  await ensureImageExists('openai');
+}
+
+// Create a new container
 app.post('/api/containers/create', async (req, res) => {
   try {
-    const containerId = `claude-${Date.now()}`;
-    const containerName = req.body.name || `Claude Terminal ${containers.size + 1}`;
+    const type = req.body.type || 'claude';
+    const config = imageConfigs[type];
+
+    if (!config) {
+      return res.status(400).json({ error: 'Invalid container type' });
+    }
+
+    const containerId = `${type}-${Date.now()}`;
+    const containerName = req.body.name || `${type.charAt(0).toUpperCase() + type.slice(1)} Terminal ${containers.size + 1}`;
 
     // Find an available port starting from 7681
     let port = 7681 + containers.size;
@@ -59,10 +93,16 @@ app.post('/api/containers/create', async (req, res) => {
       fs.mkdirSync(workspaceDir, { recursive: true });
     }
 
+    // Get the appropriate API key
+    const apiKey = process.env[config.env];
+    if (!apiKey) {
+      return res.status(500).json({ error: `${config.env} not set in environment` });
+    }
+
     const container = await docker.createContainer({
-      Image: 'whaleos-claude',
+      Image: config.name,
       name: containerId,
-      Env: [`ANTHROPIC_API_KEY=${process.env.ANTHROPIC_API_KEY}`],
+      Env: [`${config.env}=${apiKey}`],
       HostConfig: {
         PortBindings: {
           '7681/tcp': [{ HostPort: port.toString() }]
@@ -79,6 +119,7 @@ app.post('/api/containers/create', async (req, res) => {
     const info = {
       containerId: container.id,
       name: containerName,
+      type: type,
       port: port,
       workspaceDir: workspaceDir,
       created: new Date().toISOString()
@@ -256,14 +297,14 @@ wss.on('connection', (ws) => {
 // Initialize and start server
 async function start() {
   try {
-    await ensureImageExists();
+    await ensureAllImages();
 
     server.listen(PORT, () => {
       console.log(`
 ╔══════════════════════════════════════════╗
 ║            WhaleOS Server                ║
 ╠══════════════════════════════════════════╣
-║  🐋 Desktop OS for Claude Code           ║
+║  🐋 Claude  🔷 Gemini  ⚡ OpenAI          ║
 ║  🌐 Web UI: http://localhost:${PORT}      ║
 ║  🔧 API: http://localhost:${PORT}/api     ║
 ╚══════════════════════════════════════════╝

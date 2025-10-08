@@ -16,21 +16,25 @@ class WhaleOS {
     }
 
     setupEventListeners() {
-        // Claude icon - create new container (support both click and double-click)
-        const claudeIcon = document.getElementById('claude-icon');
-        let clickTimer = null;
+        // Container icons - create new container (support both click and double-click)
+        const containerIcons = document.querySelectorAll('.desktop-icon[data-container-type]');
 
-        claudeIcon.addEventListener('click', () => {
-            if (clickTimer === null) {
-                clickTimer = setTimeout(() => {
+        containerIcons.forEach(icon => {
+            let clickTimer = null;
+            const containerType = icon.dataset.containerType;
+
+            icon.addEventListener('click', () => {
+                if (clickTimer === null) {
+                    clickTimer = setTimeout(() => {
+                        clickTimer = null;
+                        this.createContainer(containerType);
+                    }, 300);
+                } else {
+                    clearTimeout(clickTimer);
                     clickTimer = null;
-                    this.createClaudeContainer();
-                }, 300);
-            } else {
-                clearTimeout(clickTimer);
-                clickTimer = null;
-                this.createClaudeContainer();
-            }
+                    this.createContainer(containerType);
+                }
+            });
         });
 
         // Files icon
@@ -76,17 +80,42 @@ class WhaleOS {
         });
     }
 
-    async createClaudeContainer() {
+    async createContainer(type = 'claude') {
         try {
-            const containerName = `Claude Terminal ${this.containers.size + 1}`;
+            const containerTypes = {
+                claude: {
+                    name: 'Claude Terminal',
+                    emoji: '🐋',
+                    loading: '🐋 Launching Claude Code container...',
+                    ready: '✓ Claude Code ready!'
+                },
+                gemini: {
+                    name: 'Gemini Terminal',
+                    emoji: '🔷',
+                    loading: '🔷 Launching Gemini CLI container...',
+                    ready: '✓ Gemini CLI ready!'
+                },
+                openai: {
+                    name: 'OpenAI Codex Terminal',
+                    emoji: '⚡',
+                    loading: '⚡ Launching OpenAI Codex container...',
+                    ready: '✓ OpenAI Codex ready!'
+                }
+            };
+
+            const config = containerTypes[type];
+            const containerName = `${config.name} ${this.containers.size + 1}`;
 
             // Show loading notification
-            this.showNotification('🐋 Launching Claude Code container...');
+            this.showNotification(config.loading);
 
             const response = await fetch('/api/containers/create', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: containerName })
+                body: JSON.stringify({
+                    name: containerName,
+                    type: type
+                })
             });
 
             if (!response.ok) {
@@ -98,8 +127,8 @@ class WhaleOS {
 
             // Wait a bit for container to be ready
             setTimeout(() => {
-                this.createWindow(data);
-                this.showNotification('✓ Claude Code ready!');
+                this.createWindow(data, config.emoji);
+                this.showNotification(config.ready);
             }, 3000);
 
             this.updateContainerCount();
@@ -109,7 +138,7 @@ class WhaleOS {
         }
     }
 
-    createWindow(containerData) {
+    createWindow(containerData, emoji = '🐋') {
         const windowId = containerData.id;
 
         // Create window element
@@ -125,7 +154,7 @@ class WhaleOS {
         windowEl.innerHTML = `
             <div class="window-header">
                 <div class="window-title">
-                    <span>🐋</span>
+                    <span>${emoji}</span>
                     <span>${containerData.name}</span>
                 </div>
                 <div class="window-controls">
