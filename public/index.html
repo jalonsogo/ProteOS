@@ -101,7 +101,7 @@
                 <button class="modal-close" data-modal="about">&times;</button>
             </div>
             <div class="modal-body">
-                <div class="about-logo">🌊</div>
+                <div class="about-logo"><i data-lucide="waves" style="width: 64px; height: 64px;"></i></div>
                 <h3>ProteOS (P/OS) v1.0</h3>
                 <p><em>"Shape-shifting intelligence from the depths of containerization"</em></p>
                 <p>ProteOS — derived from <strong>Proteus (Πρωτεύς)</strong>, the Greek sea god of shape-shifting, wisdom, and prophecy.</p>
@@ -123,7 +123,7 @@
     <div class="modal" id="files-modal">
         <div class="modal-content file-browser-modal">
             <div class="modal-header">
-                <h2>📁 Container Files</h2>
+                <h2><i data-lucide="folder" style="width: 18px; height: 18px; vertical-align: middle; margin-right: 8px;"></i>Container Files</h2>
                 <button class="modal-close" data-modal="files">&times;</button>
             </div>
             <div class="modal-body">
@@ -133,7 +133,7 @@
                 </div>
                 <div class="file-browser">
                     <div class="file-path">
-                        <button class="path-back-btn" title="Go back">⬅️</button>
+                        <button class="path-back-btn" title="Go back"><i data-lucide="arrow-left" style="width: 16px; height: 16px;"></i></button>
                         <span id="current-path">/</span>
                     </div>
                     <div class="file-list" id="file-list">
@@ -148,7 +148,7 @@
     <div class="modal" id="file-viewer-modal">
         <div class="modal-content file-viewer-modal">
             <div class="modal-header">
-                <h2 id="file-viewer-title">📄 File Viewer</h2>
+                <h2 id="file-viewer-title"><i data-lucide="file-text" style="width: 18px; height: 18px; vertical-align: middle; margin-right: 8px;"></i>File Viewer</h2>
                 <button class="modal-close" data-modal="file-viewer">&times;</button>
             </div>
             <div class="modal-body">
@@ -188,6 +188,92 @@
                         <span class="log-time">--:--:--</span>
                         <span class="log-level">INFO</span>
                         <span class="log-message">ProteOS System Logs initialized</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settings-modal">
+        <div class="modal-content settings-modal">
+            <div class="modal-header">
+                <h2>
+                    <i data-lucide="settings"></i>
+                    Settings
+                </h2>
+                <button class="modal-close" data-modal="settings">&times;</button>
+            </div>
+            <div class="modal-body settings-body">
+                <div class="settings-sidebar">
+                    <div class="settings-menu-item active" data-section="theme">
+                        <i data-lucide="palette"></i>
+                        <span>Theme</span>
+                    </div>
+                    <div class="settings-menu-item" data-section="folders">
+                        <i data-lucide="folder"></i>
+                        <span>Folders</span>
+                    </div>
+                    <div class="settings-menu-item" data-section="api-keys">
+                        <i data-lucide="key"></i>
+                        <span>API Keys</span>
+                    </div>
+                </div>
+                <div class="settings-content">
+                    <!-- Theme Section -->
+                    <div class="settings-section active" id="theme-section">
+                        <h3>Theme Settings</h3>
+                        <div class="setting-group">
+                            <label>Appearance</label>
+                            <select id="theme-selector" class="settings-select">
+                                <option value="dark">Dark Mode</option>
+                                <option value="light">Light Mode</option>
+                            </select>
+                        </div>
+                        <div class="setting-group">
+                            <label>Wallpapers</label>
+                            <div class="wallpaper-grid" id="wallpaper-grid">
+                                <div class="loading">Loading wallpapers...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Folders Section -->
+                    <div class="settings-section" id="folders-section">
+                        <h3>Workspace Folders</h3>
+                        <div class="folders-list" id="folders-list">
+                            <div class="loading">Loading folders...</div>
+                        </div>
+                    </div>
+
+                    <!-- API Keys Section -->
+                    <div class="settings-section" id="api-keys-section">
+                        <h3>API Keys</h3>
+                        <div class="setting-group">
+                            <label for="anthropic-key">
+                                <img src="images/icons/apps/Claude.svg" class="api-key-icon" alt="Claude">
+                                Anthropic (Claude)
+                            </label>
+                            <input type="password" id="anthropic-key" class="settings-input" placeholder="sk-ant-...">
+                            <small>Get your API key from <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a></small>
+                        </div>
+                        <div class="setting-group">
+                            <label for="gemini-key">
+                                <img src="images/icons/apps/Gemini.svg" class="api-key-icon" alt="Gemini">
+                                Google Gemini
+                            </label>
+                            <input type="password" id="gemini-key" class="settings-input" placeholder="AIza...">
+                            <small>Get your API key from <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com</a></small>
+                        </div>
+                        <div class="setting-group">
+                            <label for="openai-key">
+                                <img src="images/icons/apps/OpenAI.svg" class="api-key-icon" alt="OpenAI">
+                                OpenAI
+                            </label>
+                            <input type="password" id="openai-key" class="settings-input" placeholder="sk-...">
+                            <small>Get your API key from <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com</a></small>
+                        </div>
+                        <button class="settings-save-btn" id="save-api-keys-btn">Save API Keys</button>
                     </div>
                 </div>
             </div>

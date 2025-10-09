@@ -37,5 +37,5 @@ EXPOSE 7681
 # Set environment variable for API key (will be passed at runtime)
 ENV ANTHROPIC_API_KEY=""
 
-# Start ttyd with Claude Code CLI
-CMD ["ttyd", "-p", "7681", "-W", "bash", "-c", "export PS1='claude-code> ' && exec bash"]
+# Start ttyd with Claude Code CLI automatically
+CMD ["ttyd", "-p", "7681", "-W", "claude"]

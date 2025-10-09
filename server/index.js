@@ -289,6 +289,132 @@ app.get('/api/containers/:id/files/read', async (req, res) => {
   }
 });
 
+// Get list of available wallpapers
+app.get('/api/wallpapers', (req, res) => {
+  try {
+    const wallpapersDir = join(__dirname, '../public/images/wallpapers');
+
+    // Create wallpapers directory if it doesn't exist
+    if (!fs.existsSync(wallpapersDir)) {
+      fs.mkdirSync(wallpapersDir, { recursive: true });
+      return res.json([]);
+    }
+
+    const files = fs.readdirSync(wallpapersDir);
+    const wallpapers = files.filter(file => {
+      const ext = file.toLowerCase().split('.').pop();
+      return ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext);
+    });
+
+    res.json(wallpapers);
+  } catch (error) {
+    console.error('Error loading wallpapers:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get list of workspace folders
+app.get('/api/workspace/folders', (req, res) => {
+  try {
+    const workspaceDir = join(__dirname, '../workspace/containers');
+
+    // Create workspace directory if it doesn't exist
+    if (!fs.existsSync(workspaceDir)) {
+      fs.mkdirSync(workspaceDir, { recursive: true });
+      return res.json([]);
+    }
+
+    const folders = fs.readdirSync(workspaceDir)
+      .filter(name => {
+        const fullPath = join(workspaceDir, name);
+        return fs.statSync(fullPath).isDirectory();
+      })
+      .map(name => {
+        const fullPath = join(workspaceDir, name);
+        const stat = fs.statSync(fullPath);
+        return {
+          name,
+          path: fullPath,
+          created: stat.birthtime,
+          modified: stat.mtime
+        };
+      });
+
+    res.json(folders);
+  } catch (error) {
+    console.error('Error loading workspace folders:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Delete workspace folder
+app.delete('/api/workspace/folders/:name', (req, res) => {
+  try {
+    const { name } = req.params;
+    const workspaceDir = join(__dirname, '../workspace/containers');
+    const folderPath = join(workspaceDir, name);
+
+    // Security check: ensure path is within workspace
+    if (!folderPath.startsWith(workspaceDir)) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
+    if (!fs.existsSync(folderPath)) {
+      return res.status(404).json({ error: 'Folder not found' });
+    }
+
+    // Remove folder recursively
+    fs.rmSync(folderPath, { recursive: true, force: true });
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting workspace folder:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Save API keys (store in .env file or environment)
+app.post('/api/settings/api-keys', (req, res) => {
+  try {
+    const { anthropic, gemini, openai } = req.body;
+
+    // Update environment variables in memory
+    if (anthropic) process.env.ANTHROPIC_API_KEY = anthropic;
+    if (gemini) process.env.GEMINI_API_KEY = gemini;
+    if (openai) process.env.OPENAI_API_KEY = openai;
+
+    // Optionally, write to .env file (be careful with this in production)
+    const envPath = join(__dirname, '../.env');
+    let envContent = '';
+
+    if (fs.existsSync(envPath)) {
+      envContent = fs.readFileSync(envPath, 'utf8');
+    }
+
+    // Update or add keys
+    const updateEnvVar = (content, key, value) => {
+      if (!value) return content;
+      const regex = new RegExp(`^${key}=.*$`, 'm');
+      if (regex.test(content)) {
+        return content.replace(regex, `${key}=${value}`);
+      } else {
+        return content + `\n${key}=${value}`;
+      }
+    };
+
+    envContent = updateEnvVar(envContent, 'ANTHROPIC_API_KEY', anthropic);
+    envContent = updateEnvVar(envContent, 'GEMINI_API_KEY', gemini);
+    envContent = updateEnvVar(envContent, 'OPENAI_API_KEY', openai);
+
+    fs.writeFileSync(envPath, envContent.trim() + '\n');
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error saving API keys:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // WebSocket handler for terminal proxy (if needed for custom features)
 wss.on('connection', (ws) => {
   console.log('WebSocket client connected');

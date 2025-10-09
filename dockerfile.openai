@@ -19,31 +19,16 @@ RUN npm install -g @openai/codex --production --no-audit --no-fund && \
 # Create config directory
 RUN mkdir -p /root/.codex
 
-# Create startup script
+# Create startup script that launches OpenAI Codex automatically
 RUN echo '#!/bin/bash' > /start.sh && \
     echo 'if [ -z "$OPENAI_API_KEY" ]; then' >> /start.sh && \
-    echo '  echo "================================================"' >> /start.sh && \
-    echo '  echo "OpenAI Codex CLI requires authentication"' >> /start.sh && \
-    echo '  echo "================================================"' >> /start.sh && \
-    echo '  echo ""' >> /start.sh && \
-    echo '  echo "Options:"' >> /start.sh && \
-    echo '  echo "1. Set OPENAI_API_KEY environment variable"' >> /start.sh && \
-    echo '  echo "   Get API key: https://platform.openai.com/api-keys"' >> /start.sh && \
-    echo '  echo ""' >> /start.sh && \
-    echo '  echo "2. Or sign in with ChatGPT account (Plus/Pro/Team required)"' >> /start.sh && \
-    echo '  echo "   Run: codex"' >> /start.sh && \
-    echo '  echo ""' >> /start.sh && \
-    echo '  echo "================================================"' >> /start.sh && \
-    echo '  echo ""' >> /start.sh && \
+    echo '  echo "Error: Set OPENAI_API_KEY environment variable"' >> /start.sh && \
+    echo '  echo "Get API key: https://platform.openai.com/api-keys"' >> /start.sh && \
+    echo '  exit 1' >> /start.sh && \
     echo 'fi' >> /start.sh && \
     echo '' >> /start.sh && \
-    echo 'echo "OpenAI Codex CLI ready at http://localhost:7681"' >> /start.sh && \
-    echo 'echo ""' >> /start.sh && \
-    echo 'echo "Available commands:"' >> /start.sh && \
-    echo 'echo "  codex              - Start interactive coding agent"' >> /start.sh && \
-    echo 'echo "  codex exec <task>  - Run non-interactive task"' >> /start.sh && \
-    echo 'echo "  codex --help       - Show help"' >> /start.sh && \
-    echo 'echo ""' >> /start.sh && \
+    echo 'echo "Starting OpenAI Codex CLI..."' >> /start.sh && \
+    echo 'exec codex' >> /start.sh && \
     chmod +x /start.sh
 
 # Set proper environment for interactive terminal
@@ -53,5 +38,5 @@ ENV SHELL=/bin/bash
 EXPOSE 7681
 WORKDIR /workspace
 
-# Use ttyd with proper options for interactive terminal
-CMD ["ttyd", "-W", "-p", "7681", "-t", "titleFixed=OpenAI Codex CLI Terminal", "-t", "theme={'background':'#1e1e1e','foreground':'#ffffff'}", "/bin/bash", "-il", "-c", "source /start.sh; exec bash -i"]
+# Start ttyd with OpenAI Codex CLI automatically
+CMD ["ttyd", "-W", "-p", "7681", "-t", "titleFixed=OpenAI Codex CLI", "/bin/bash", "/start.sh"]

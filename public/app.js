@@ -68,6 +68,10 @@ class WhaleOS {
             window.open('https://github.com/jalonsogo/ProteOS/issues', '_blank');
         });
 
+        document.getElementById('settings-menu')?.addEventListener('click', () => {
+            this.showSettings();
+        });
+
         // Modal close buttons
         document.querySelectorAll('.modal-close').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -76,6 +80,7 @@ class WhaleOS {
                 if (modalType === 'files') this.hideFileBrowser();
                 if (modalType === 'file-viewer') this.hideFileViewer();
                 if (modalType === 'logs') this.hideLogViewer();
+                if (modalType === 'settings') this.hideSettings();
             });
         });
 
@@ -88,6 +93,24 @@ class WhaleOS {
         });
         document.getElementById('file-viewer-modal').addEventListener('click', (e) => {
             if (e.target.id === 'file-viewer-modal') this.hideFileViewer();
+        });
+        document.getElementById('settings-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'settings-modal') this.hideSettings();
+        });
+
+        // Settings controls
+        document.querySelectorAll('.settings-menu-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                this.switchSettingsSection(item.dataset.section);
+            });
+        });
+
+        document.getElementById('save-api-keys-btn')?.addEventListener('click', () => {
+            this.saveApiKeys();
+        });
+
+        document.getElementById('theme-selector')?.addEventListener('change', (e) => {
+            this.changeTheme(e.target.value);
         });
 
         // File browser controls
@@ -108,21 +131,21 @@ class WhaleOS {
                 claude: {
                     name: 'Claude Terminal',
                     icon: '<img src="images/icons/apps/Claude.svg" alt="Claude" class="window-icon" onerror="this.src=\'images/icons/apps/Claude.png\'">',
-                    emoji: '🐋',  // Fallback
+                    fallbackIcon: '<i data-lucide="terminal" style="width: 20px; height: 20px;"></i>',
                     loading: 'Launching Claude Code container...',
                     ready: 'Claude Code ready!'
                 },
                 gemini: {
                     name: 'Gemini Terminal',
                     icon: '<img src="images/icons/apps/Gemini.svg" alt="Gemini" class="window-icon" onerror="this.src=\'images/icons/apps/Gemini.png\'">',
-                    emoji: '🔷',  // Fallback
+                    fallbackIcon: '<i data-lucide="sparkles" style="width: 20px; height: 20px;"></i>',
                     loading: 'Launching Gemini CLI container...',
                     ready: 'Gemini CLI ready!'
                 },
                 openai: {
                     name: 'OpenAI Codex Terminal',
                     icon: '<img src="images/icons/apps/OpenAI.svg" alt="OpenAI" class="window-icon" onerror="this.src=\'images/icons/apps/OpenAI.png\'">',
-                    emoji: '⚡',  // Fallback
+                    fallbackIcon: '<i data-lucide="zap" style="width: 20px; height: 20px;"></i>',
                     loading: 'Launching OpenAI Codex container...',
                     ready: 'OpenAI Codex ready!'
                 }
@@ -155,7 +178,7 @@ class WhaleOS {
 
             // Wait a bit for container to be ready
             setTimeout(() => {
-                this.createWindow(data, config.icon || config.emoji, type);
+                this.createWindow(data, config.icon || config.fallbackIcon, type);
                 this.showNotification(config.ready);
                 this.addLog('success', config.ready);
             }, 3000);
@@ -168,7 +191,7 @@ class WhaleOS {
         }
     }
 
-    createWindow(containerData, icon = '🐋', type = 'claude') {
+    createWindow(containerData, icon = '<i data-lucide="terminal" style="width: 20px; height: 20px;"></i>', type = 'claude') {
         const windowId = containerData.id;
 
         // Create window element
@@ -196,7 +219,7 @@ class WhaleOS {
             </div>
             <div class="window-content">
                 <div class="loading-message">
-                    <div class="loading-spinner">⏳</div>
+                    <div class="loading-spinner"><i data-lucide="loader" style="width: 32px; height: 32px; animation: spin 1s linear infinite;"></i></div>
                     <p>Loading terminal...</p>
                 </div>
                 <iframe src="${window.location.protocol}//${window.location.hostname}:${containerData.port}" style="display:none;"></iframe>
@@ -349,19 +372,19 @@ class WhaleOS {
             return;
         }
 
-        // Get icon/emoji from window
+        // Get icon from window
         const windowTitle = windowEl.querySelector('.window-title');
         const iconWrapper = windowTitle?.querySelector('.window-icon-wrapper');
         const titleElement = windowTitle?.querySelector('span:last-child');
 
-        // Check if icon is an img element or text/emoji
-        let icon = '🐋';
+        // Check if icon is an img element or Lucide icon
+        let icon = '<i data-lucide="terminal" style="width: 18px; height: 18px;"></i>';
         if (iconWrapper) {
             const imgElement = iconWrapper.querySelector('img.window-icon');
             if (imgElement) {
                 icon = imgElement.outerHTML;
             } else {
-                icon = iconWrapper.innerHTML || '🐋';
+                icon = iconWrapper.innerHTML || '<i data-lucide="terminal" style="width: 18px; height: 18px;"></i>';
             }
         }
 
@@ -491,7 +514,7 @@ class WhaleOS {
         button.className = 'taskbar-app active';
         button.dataset.windowId = windowId;
         button.innerHTML = `
-            <span>🐋</span>
+            <i data-lucide="terminal" style="width: 16px; height: 16px;"></i>
             <span>${containerData.name}</span>
         `;
 
@@ -566,7 +589,7 @@ class WhaleOS {
     }
 
     showNotification(message, isError = false) {
-        console.log(isError ? '❌' : '✓', message);
+        console.log(isError ? '[ERROR]' : '[SUCCESS]', message);
 
         // Create toast notification
         const toast = document.createElement('div');
@@ -666,7 +689,9 @@ class WhaleOS {
             const fileItem = document.createElement('div');
             fileItem.className = 'file-item';
 
-            const icon = file.type === 'directory' ? '📁' : '📄';
+            const icon = file.type === 'directory'
+                ? '<i data-lucide="folder" style="width: 20px; height: 20px; color: #fbbf24;"></i>'
+                : '<i data-lucide="file" style="width: 20px; height: 20px; color: #9ca3af;"></i>';
             const size = file.type === 'file' ? this.formatFileSize(file.size) : '';
 
             fileItem.innerHTML = `
@@ -687,6 +712,9 @@ class WhaleOS {
 
             fileList.appendChild(fileItem);
         });
+
+        // Re-initialize Lucide icons for file browser
+        setTimeout(() => lucide.createIcons(), 10);
     }
 
     openDirectory(name) {
@@ -723,14 +751,16 @@ class WhaleOS {
             this.showFileViewer(data);
         } catch (error) {
             console.error('Error reading file:', error);
-            this.showNotification('❌ Failed to read file', true);
+            this.showNotification('Failed to read file', true);
         }
     }
 
     showFileViewer(fileData) {
-        document.getElementById('file-viewer-title').textContent = `📄 ${fileData.name}`;
+        const titleEl = document.getElementById('file-viewer-title');
+        titleEl.innerHTML = `<i data-lucide="file-text" style="width: 18px; height: 18px; vertical-align: middle; margin-right: 8px;"></i>${fileData.name}`;
         document.getElementById('file-content').textContent = fileData.content;
         document.getElementById('file-viewer-modal').classList.add('active');
+        setTimeout(() => lucide.createIcons(), 10);
     }
 
     hideFileViewer() {
@@ -765,13 +795,13 @@ class WhaleOS {
         this.logs.push(logEntry);
 
         // Also log to console
-        const emoji = {
-            info: 'ℹ️',
-            success: '✓',
-            warning: '⚠️',
-            error: '❌'
+        const prefix = {
+            info: '[INFO]',
+            success: '[SUCCESS]',
+            warning: '[WARNING]',
+            error: '[ERROR]'
         };
-        console.log(`${emoji[level]} [${timeString}] ${message}`);
+        console.log(`${prefix[level]} [${timeString}] ${message}`);
 
         // Update UI if log viewer is open
         if (document.getElementById('logs-modal').classList.contains('active')) {
@@ -1056,19 +1086,19 @@ class WhaleOS {
             const isMinimized = windowEl.classList.contains('minimized');
             const isActive = parseInt(windowEl.style.zIndex) === this.zIndexCounter - 1;
 
-            // Get icon/emoji from window
+            // Get icon from window
             const windowTitle = windowEl.querySelector('.window-title');
             const iconWrapper = windowTitle?.querySelector('.window-icon-wrapper');
             const titleElement = windowTitle?.querySelector('span:last-child');
 
-            // Check if icon is an img element or text/emoji
-            let icon = '🐋';
+            // Check if icon is an img element or Lucide icon
+            let icon = '<i data-lucide="terminal" style="width: 20px; height: 20px;"></i>';
             if (iconWrapper) {
                 const imgElement = iconWrapper.querySelector('img.window-icon');
                 if (imgElement) {
                     icon = imgElement.outerHTML;
                 } else {
-                    icon = iconWrapper.innerHTML || '🐋';
+                    icon = iconWrapper.innerHTML || '<i data-lucide="terminal" style="width: 20px; height: 20px;"></i>';
                 }
             }
 
@@ -1130,12 +1160,285 @@ class WhaleOS {
         // Re-initialize Lucide icons
         setTimeout(() => lucide.createIcons(), 10);
     }
+
+    // Settings Methods
+    showSettings() {
+        document.getElementById('settings-modal').classList.add('active');
+        this.loadSettings();
+        this.loadWallpapers();
+        this.loadWorkspaceFolders();
+    }
+
+    hideSettings() {
+        document.getElementById('settings-modal').classList.remove('active');
+    }
+
+    switchSettingsSection(section) {
+        // Update sidebar menu items
+        document.querySelectorAll('.settings-menu-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        document.querySelector(`[data-section="${section}"]`).classList.add('active');
+
+        // Update content sections
+        document.querySelectorAll('.settings-section').forEach(sec => {
+            sec.classList.remove('active');
+        });
+        document.getElementById(`${section}-section`).classList.add('active');
+
+        // Re-initialize Lucide icons
+        setTimeout(() => lucide.createIcons(), 10);
+    }
+
+    loadSettings() {
+        // Load theme
+        const theme = localStorage.getItem('proteOS_theme') || 'dark';
+        document.getElementById('theme-selector').value = theme;
+        document.body.dataset.theme = theme;
+
+        // Load API keys
+        const anthropicKey = localStorage.getItem('proteOS_anthropic_key') || '';
+        const geminiKey = localStorage.getItem('proteOS_gemini_key') || '';
+        const openaiKey = localStorage.getItem('proteOS_openai_key') || '';
+
+        document.getElementById('anthropic-key').value = anthropicKey;
+        document.getElementById('gemini-key').value = geminiKey;
+        document.getElementById('openai-key').value = openaiKey;
+    }
+
+    changeTheme(theme) {
+        document.body.dataset.theme = theme;
+        localStorage.setItem('proteOS_theme', theme);
+        this.addLog('info', `Theme changed to ${theme} mode`);
+        this.showNotification(`Theme changed to ${theme} mode`);
+    }
+
+    async loadWallpapers() {
+        const wallpaperGrid = document.getElementById('wallpaper-grid');
+        wallpaperGrid.innerHTML = '<div class="loading">Loading wallpapers...</div>';
+
+        try {
+            const response = await fetch('/api/wallpapers');
+            if (!response.ok) {
+                throw new Error('Failed to load wallpapers');
+            }
+
+            const wallpapers = await response.json();
+
+            if (wallpapers.length === 0) {
+                wallpaperGrid.innerHTML = '<div class="empty-state">No wallpapers available</div>';
+                return;
+            }
+
+            // Get current wallpaper or default to ocean-depths.png
+            const currentWallpaper = localStorage.getItem('proteOS_wallpaper') || 'ocean-depths.png';
+
+            // Apply saved wallpaper on load
+            this.applyWallpaper(currentWallpaper);
+
+            wallpaperGrid.innerHTML = '';
+            wallpapers.forEach(wallpaper => {
+                const wallpaperItem = document.createElement('div');
+                wallpaperItem.className = 'wallpaper-item';
+                if (wallpaper === currentWallpaper) {
+                    wallpaperItem.classList.add('active');
+                }
+
+                wallpaperItem.innerHTML = `
+                    <img src="images/wallpapers/${wallpaper}" alt="${wallpaper}">
+                    <div class="wallpaper-item-check"><i data-lucide="check" style="width: 16px; height: 16px;"></i></div>
+                `;
+
+                wallpaperItem.addEventListener('click', () => {
+                    this.changeWallpaper(wallpaper);
+                });
+
+                wallpaperGrid.appendChild(wallpaperItem);
+            });
+
+            // Re-initialize Lucide icons for wallpaper checkmarks
+            setTimeout(() => lucide.createIcons(), 10);
+        } catch (error) {
+            console.error('Error loading wallpapers:', error);
+            wallpaperGrid.innerHTML = '<div class="empty-state">Error loading wallpapers</div>';
+        }
+    }
+
+    applyWallpaper(wallpaper) {
+        const desktop = document.querySelector('.desktop');
+        const isLightTheme = document.body.dataset.theme === 'light';
+        const gradient = isLightTheme
+            ? 'linear-gradient(0deg, rgba(255, 255, 255, 0.5) 0%, transparent 30%)'
+            : 'linear-gradient(0deg, rgba(0, 0, 0, 0.3) 0%, transparent 30%)';
+
+        desktop.style.backgroundImage = `
+            ${gradient},
+            url('images/wallpapers/${wallpaper}')
+        `;
+        desktop.style.backgroundSize = 'cover';
+        desktop.style.backgroundPosition = 'center';
+        desktop.style.backgroundRepeat = 'no-repeat';
+    }
+
+    changeWallpaper(wallpaper) {
+        // Update active state
+        document.querySelectorAll('.wallpaper-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        event.target.closest('.wallpaper-item').classList.add('active');
+
+        // Apply wallpaper
+        this.applyWallpaper(wallpaper);
+
+        // Save preference
+        localStorage.setItem('proteOS_wallpaper', wallpaper);
+
+        // Re-initialize Lucide icons after updating active state
+        setTimeout(() => lucide.createIcons(), 10);
+
+        this.addLog('info', `Wallpaper changed to ${wallpaper}`);
+        this.showNotification('Wallpaper changed');
+    }
+
+    async loadWorkspaceFolders() {
+        const foldersList = document.getElementById('folders-list');
+        foldersList.innerHTML = '<div class="loading">Loading folders...</div>';
+
+        try {
+            const response = await fetch('/api/workspace/folders');
+            if (!response.ok) {
+                throw new Error('Failed to load folders');
+            }
+
+            const folders = await response.json();
+
+            if (folders.length === 0) {
+                foldersList.innerHTML = '<div class="empty-state">No workspace folders yet</div>';
+                return;
+            }
+
+            foldersList.innerHTML = '';
+            folders.forEach(folder => {
+                const folderItem = document.createElement('div');
+                folderItem.className = 'folder-item';
+
+                folderItem.innerHTML = `
+                    <div class="folder-item-icon">
+                        <i data-lucide="folder"></i>
+                    </div>
+                    <div class="folder-item-info">
+                        <div class="folder-item-name">${folder.name}</div>
+                        <div class="folder-item-path">${folder.path}</div>
+                    </div>
+                    <div class="folder-item-actions">
+                        <button class="folder-action-btn view" data-folder="${folder.name}">
+                            <i data-lucide="eye"></i>
+                            View
+                        </button>
+                        <button class="folder-action-btn delete" data-folder="${folder.name}">
+                            <i data-lucide="trash-2"></i>
+                            Delete
+                        </button>
+                    </div>
+                `;
+
+                // View button
+                folderItem.querySelector('.view').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.viewWorkspaceFolder(folder.name);
+                });
+
+                // Delete button
+                folderItem.querySelector('.delete').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.deleteWorkspaceFolder(folder.name);
+                });
+
+                foldersList.appendChild(folderItem);
+            });
+
+            // Re-initialize Lucide icons
+            setTimeout(() => lucide.createIcons(), 10);
+        } catch (error) {
+            console.error('Error loading folders:', error);
+            foldersList.innerHTML = '<div class="empty-state">Error loading folders</div>';
+        }
+    }
+
+    viewWorkspaceFolder(folderName) {
+        // Close settings and open file browser
+        this.hideSettings();
+
+        // TODO: Implement opening file browser for specific workspace folder
+        // For now, just show a notification
+        this.showNotification(`Opening folder: ${folderName}`);
+        this.addLog('info', `Viewing workspace folder: ${folderName}`);
+    }
+
+    async deleteWorkspaceFolder(folderName) {
+        if (!confirm(`Delete workspace folder "${folderName}"? This will remove all files in the folder.`)) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/workspace/folders/${folderName}`, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to delete folder');
+            }
+
+            this.addLog('success', `Deleted workspace folder: ${folderName}`);
+            this.showNotification('Folder deleted');
+
+            // Reload folders list
+            this.loadWorkspaceFolders();
+        } catch (error) {
+            console.error('Error deleting folder:', error);
+            this.addLog('error', `Failed to delete folder: ${error.message}`);
+            this.showNotification('Failed to delete folder', true);
+        }
+    }
+
+    saveApiKeys() {
+        const anthropicKey = document.getElementById('anthropic-key').value.trim();
+        const geminiKey = document.getElementById('gemini-key').value.trim();
+        const openaiKey = document.getElementById('openai-key').value.trim();
+
+        // Save to localStorage
+        if (anthropicKey) localStorage.setItem('proteOS_anthropic_key', anthropicKey);
+        if (geminiKey) localStorage.setItem('proteOS_gemini_key', geminiKey);
+        if (openaiKey) localStorage.setItem('proteOS_openai_key', openaiKey);
+
+        // Also send to server
+        fetch('/api/settings/api-keys', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                anthropic: anthropicKey,
+                gemini: geminiKey,
+                openai: openaiKey
+            })
+        }).then(response => {
+            if (response.ok) {
+                this.addLog('success', 'API keys saved successfully');
+                this.showNotification('API keys saved successfully');
+            } else {
+                throw new Error('Failed to save API keys');
+            }
+        }).catch(error => {
+            console.error('Error saving API keys:', error);
+            this.addLog('error', 'Failed to save API keys to server');
+            this.showNotification('API keys saved locally, but failed to sync to server', true);
+        });
+    }
 }
 
 // Initialize WhaleOS when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     window.whaleOS = new WhaleOS();
-    console.log('🐋 ProteOS Desktop initialized');
+    console.log('[PROTEOS] Desktop initialized');
     window.whaleOS.addLog('info', 'ProteOS System initialized - Shape-shifting AI platform ready');
     window.whaleOS.addLog('info', `Server URL: ${window.location.origin}`);
 });

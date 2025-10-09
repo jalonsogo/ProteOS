@@ -4,11 +4,119 @@
     box-sizing: border-box;
 }
 
+/* Theme Variables */
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
     overflow: hidden;
     height: 100vh;
-    background: #0a1929;
+}
+
+/* Dark Theme (Default) */
+body,
+body[data-theme="dark"] {
+    --bg-primary: #0a1929;
+    --bg-secondary: #2d2d2d;
+    --bg-tertiary: #1e1e1e;
+    --bg-modal: #2d2d2d;
+    --bg-taskbar: rgba(33, 39, 54, 0.8);
+    --bg-window-header: rgba(0, 0, 0, 0.3);
+    --bg-window-content: #1e1e1e;
+    --bg-input: rgba(0, 0, 0, 0.3);
+    --bg-hover: rgba(255, 255, 255, 0.1);
+    --bg-active: rgba(102, 126, 234, 0.2);
+
+    --text-primary: white;
+    --text-secondary: #ccc;
+    --text-tertiary: #999;
+    --text-muted: #666;
+
+    --border-color: rgba(255, 255, 255, 0.1);
+    --border-hover: rgba(255, 255, 255, 0.2);
+
+    --shadow-color: rgba(0, 0, 0, 0.5);
+
+    background: var(--bg-primary);
+}
+
+/* Light Theme */
+body[data-theme="light"] {
+    --bg-primary: #f0f4f8;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #f8f9fa;
+    --bg-modal: #ffffff;
+    --bg-taskbar: rgba(255, 255, 255, 0.95);
+    --bg-window-header: rgba(0, 0, 0, 0.05);
+    --bg-window-content: #ffffff;
+    --bg-input: rgba(0, 0, 0, 0.05);
+    --bg-hover: rgba(0, 0, 0, 0.05);
+    --bg-active: rgba(102, 126, 234, 0.15);
+
+    --text-primary: #1a202c;
+    --text-secondary: #2d3748;
+    --text-tertiary: #4a5568;
+    --text-muted: #a0aec0;
+
+    --border-color: rgba(0, 0, 0, 0.1);
+    --border-hover: rgba(0, 0, 0, 0.2);
+
+    --shadow-color: rgba(0, 0, 0, 0.15);
+
+    background: var(--bg-primary);
+}
+
+/* Light theme specific adjustments */
+body[data-theme="light"] .desktop {
+    background:
+        linear-gradient(0deg, rgba(255, 255, 255, 0.5) 0%, transparent 30%),
+        url('background.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+body[data-theme="light"] .desktop::before {
+    opacity: 0.2;
+}
+
+body[data-theme="light"] .icon-label {
+    color: #1a202c;
+    text-shadow: 0 1px 3px rgba(255,255,255,0.8);
+}
+
+body[data-theme="light"] .desktop-icon:hover .icon-label {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+/* Light theme text improvements */
+body[data-theme="light"] .tray-item {
+    color: #1a202c;
+    font-weight: 500;
+}
+
+body[data-theme="light"] .settings-menu-item {
+    color: #4a5568;
+}
+
+body[data-theme="light"] .settings-menu-item:hover {
+    color: #1a202c;
+}
+
+body[data-theme="light"] .settings-menu-item.active {
+    color: #1a202c;
+}
+
+body[data-theme="light"] .settings-input::placeholder,
+body[data-theme="light"] .settings-select option {
+    color: #718096;
+}
+
+body[data-theme="light"] .container-selector select {
+    color: #1a202c;
+    background: rgba(0, 0, 0, 0.05);
+}
+
+body[data-theme="light"] .container-selector label {
+    color: #4a5568;
 }
 
 /* Desktop */
@@ -16,7 +124,7 @@ body {
     width: 100vw;
     height: 100vh;
     background:
-        linear-gradient(180deg, rgba(26, 77, 94, 0.8) 0%, rgba(10, 25, 41, 0.9) 50%, rgba(5, 13, 22, 0.95) 100%),
+        linear-gradient(0deg, rgba(0, 0, 0, 0.3) 0%, transparent 30%),
         url('background.png');
     background-size: cover;
     background-position: center;
@@ -45,18 +153,7 @@ body {
     pointer-events: none;
 }
 
-/* Whale silhouette */
-.desktop::after {
-    content: '🐋';
-    position: absolute;
-    left: 5%;
-    bottom: 15%;
-    font-size: 120px;
-    opacity: 0.15;
-    filter: blur(2px);
-    pointer-events: none;
-    transform: rotate(-15deg);
-}
+/* Removed waves icon - cleaner wallpaper display */
 
 @keyframes drift {
     0%, 100% { background-position: 0% 0%; }
@@ -131,14 +228,14 @@ body {
     left: 0;
     right: 0;
     height: 36px;
-    background: rgba(33, 39, 54, 0.8);
+    background: var(--bg-taskbar);
     backdrop-filter: blur(32px);
     -webkit-backdrop-filter: blur(32px);
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 0 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid var(--border-color);
     z-index: 1000;
     border-radius: 8px 8px 0 0;
 }
@@ -158,7 +255,7 @@ body {
     padding: 0;
     background: transparent;
     border: none;
-    color: white;
+    color: var(--text-primary);
     font-weight: 700;
     font-size: 14px;
     cursor: pointer;
@@ -195,7 +292,7 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
-    color: white;
+    color: var(--text-primary);
     font-size: 13px;
     font-weight: 400;
     cursor: pointer;
@@ -273,7 +370,7 @@ body {
 .system-tray {
     display: flex;
     gap: 24px;
-    color: white;
+    color: var(--text-primary);
     font-size: 13px;
     align-items: center;
 }
@@ -325,9 +422,9 @@ body {
 
 .window {
     position: absolute;
-    background: #2d2d2d;
+    background: var(--bg-secondary);
     border-radius: 8px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 10px 40px var(--shadow-color);
     display: flex;
     flex-direction: column;
     pointer-events: auto;
@@ -342,18 +439,18 @@ body {
 }
 
 .window-header {
-    background: rgba(0, 0, 0, 0.3);
+    background: var(--bg-window-header);
     padding: 12px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     cursor: move;
     user-select: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .window-title {
-    color: white;
+    color: var(--text-primary);
     font-size: 14px;
     font-weight: 500;
     display: flex;
@@ -416,7 +513,7 @@ body {
 .window-content {
     flex: 1;
     position: relative;
-    background: #1e1e1e;
+    background: var(--bg-window-content);
 }
 
 .window-content iframe {
@@ -464,25 +561,25 @@ body {
 }
 
 .modal-content {
-    background: #2d2d2d;
+    background: var(--bg-modal);
     border-radius: 12px;
     width: 90%;
     max-width: 500px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 20px 60px var(--shadow-color);
     overflow: hidden;
 }
 
 .modal-header {
-    background: rgba(0, 0, 0, 0.3);
+    background: var(--bg-window-header);
     padding: 16px 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .modal-header h2 {
-    color: white;
+    color: var(--text-primary);
     font-size: 18px;
     margin: 0;
 }
@@ -490,7 +587,7 @@ body {
 .modal-close {
     background: none;
     border: none;
-    color: white;
+    color: var(--text-primary);
     font-size: 28px;
     cursor: pointer;
     padding: 0;
@@ -509,13 +606,20 @@ body {
 
 .modal-body {
     padding: 24px;
-    color: #ccc;
+    color: var(--text-secondary);
 }
 
 .about-logo {
-    font-size: 64px;
     text-align: center;
     margin-bottom: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #667eea;
+}
+
+.about-logo svg {
+    stroke: currentColor;
 }
 
 .modal-body h3 {
@@ -578,7 +682,7 @@ body {
 /* Toast Notifications */
 .toast-notification {
     position: fixed;
-    top: 20px;
+    bottom: 80px;
     right: 20px;
     background: rgba(0, 0, 0, 0.9);
     color: white;
@@ -1226,4 +1330,315 @@ body {
 
 .session-action-btn.close:hover {
     background: rgba(248, 113, 113, 0.3);
+}
+
+/* Settings Modal */
+.settings-modal {
+    max-width: 900px;
+    width: 90%;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.settings-body {
+    display: flex;
+    padding: 0;
+    overflow: hidden;
+    max-height: calc(80vh - 70px);
+}
+
+.settings-sidebar {
+    width: 200px;
+    background: rgba(0, 0, 0, 0.3);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 16px 0;
+    flex-shrink: 0;
+}
+
+.settings-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    color: #999;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+}
+
+.settings-menu-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+}
+
+.settings-menu-item.active {
+    background: rgba(102, 126, 234, 0.2);
+    color: white;
+    border-left: 3px solid #667eea;
+}
+
+.settings-menu-item svg {
+    width: 18px;
+    height: 18px;
+    stroke: currentColor;
+    stroke-width: 2;
+}
+
+.settings-content {
+    flex: 1;
+    padding: 24px;
+    overflow-y: auto;
+    min-width: 0;
+}
+
+.settings-section {
+    display: none;
+}
+
+.settings-section.active {
+    display: block;
+}
+
+.settings-section h3 {
+    color: var(--text-primary);
+    font-size: 20px;
+    margin-bottom: 24px;
+    font-weight: 600;
+}
+
+.setting-group {
+    margin-bottom: 24px;
+}
+
+.setting-group label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+.api-key-icon {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+}
+
+.settings-input,
+.settings-select {
+    width: 100%;
+    padding: 10px 12px;
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-size: 14px;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.settings-input:focus,
+.settings-select:focus {
+    outline: none;
+    border-color: #667eea;
+    background: var(--bg-hover);
+}
+
+.settings-input::placeholder {
+    color: #666;
+}
+
+.setting-group small {
+    display: block;
+    color: #888;
+    font-size: 12px;
+    margin-top: 6px;
+}
+
+.setting-group small a {
+    color: #667eea;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.setting-group small a:hover {
+    color: #8b9ef8;
+    text-decoration: underline;
+}
+
+.settings-save-btn {
+    padding: 10px 24px;
+    background: #667eea;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 8px;
+}
+
+.settings-save-btn:hover {
+    background: #7c8ff0;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.settings-save-btn:active {
+    transform: translateY(0);
+}
+
+/* Wallpaper Grid */
+.wallpaper-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.wallpaper-item {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.wallpaper-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.wallpaper-item.active {
+    border-color: #667eea;
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.3);
+}
+
+.wallpaper-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.wallpaper-item-check {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 24px;
+    height: 24px;
+    background: #667eea;
+    border-radius: 50%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.wallpaper-item.active .wallpaper-item-check {
+    display: flex;
+}
+
+/* Folders List */
+.folders-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.folder-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.2s;
+}
+
+.folder-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.folder-item-icon {
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+}
+
+.folder-item-icon svg {
+    width: 24px;
+    height: 24px;
+    stroke: #fbbf24;
+    stroke-width: 2;
+}
+
+.folder-item-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.folder-item-name {
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.folder-item-path {
+    color: #888;
+    font-size: 12px;
+    font-family: monospace;
+}
+
+.folder-item-actions {
+    display: flex;
+    gap: 8px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.folder-item:hover .folder-item-actions {
+    opacity: 1;
+}
+
+.folder-action-btn {
+    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    border-radius: 4px;
+    color: white;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.folder-action-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.folder-action-btn.delete:hover {
+    background: rgba(248, 113, 113, 0.3);
+    color: #f87171;
 }
