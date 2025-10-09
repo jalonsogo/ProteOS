@@ -207,8 +207,8 @@ class WhaleOS {
         this.setupWindowDragging(windowEl);
         this.setupWindowResize(windowEl);
 
-        // Create taskbar button
-        this.createTaskbarButton(containerData, windowId);
+        // Create taskbar button (disabled - no taskbar-apps container in new design)
+        // this.createTaskbarButton(containerData, windowId);
 
         // Show iframe after loading
         const iframe = windowEl.querySelector('iframe');
@@ -316,8 +316,9 @@ class WhaleOS {
 
     minimizeWindow(windowEl, windowId) {
         windowEl.classList.add('minimized');
-        const taskbarBtn = document.querySelector(`[data-window-id="${windowId}"]`);
-        if (taskbarBtn) taskbarBtn.classList.remove('active');
+        // Taskbar button functionality disabled in new design
+        // const taskbarBtn = document.querySelector(`[data-window-id="${windowId}"]`);
+        // if (taskbarBtn) taskbarBtn.classList.remove('active');
     }
 
     maximizeWindow(windowEl) {
@@ -353,9 +354,9 @@ class WhaleOS {
                 windowEl.remove();
                 this.windows.delete(windowId);
 
-                // Remove taskbar button
-                const taskbarBtn = document.querySelector(`[data-window-id="${windowId}"]`);
-                if (taskbarBtn) taskbarBtn.remove();
+                // Taskbar button functionality disabled in new design
+                // const taskbarBtn = document.querySelector(`[data-window-id="${windowId}"]`);
+                // if (taskbarBtn) taskbarBtn.remove();
 
                 // Stop container
                 const response = await fetch(`/api/containers/${windowId}`, {
@@ -404,14 +405,13 @@ class WhaleOS {
     bringToFront(windowEl) {
         windowEl.style.zIndex = this.zIndexCounter++;
 
-        // Update taskbar buttons
-        document.querySelectorAll('.taskbar-app').forEach(btn => {
-            btn.classList.remove('active');
-        });
-
-        const windowId = windowEl.id.replace('window-', '');
-        const taskbarBtn = document.querySelector(`[data-window-id="${windowId}"]`);
-        if (taskbarBtn) taskbarBtn.classList.add('active');
+        // Taskbar button functionality disabled in new design
+        // document.querySelectorAll('.taskbar-app').forEach(btn => {
+        //     btn.classList.remove('active');
+        // });
+        // const windowId = windowEl.id.replace('window-', '');
+        // const taskbarBtn = document.querySelector(`[data-window-id="${windowId}"]`);
+        // if (taskbarBtn) taskbarBtn.classList.add('active');
     }
 
     showAboutModal() {

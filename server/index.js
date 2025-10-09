@@ -73,6 +73,7 @@ async function ensureAllImages() {
 
 // Create a new container
 app.post('/api/containers/create', async (req, res) => {
+  console.log('📦 Container creation request received:', req.body);
   try {
     const type = req.body.type || 'claude';
     const config = imageConfigs[type];
