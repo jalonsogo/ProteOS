@@ -193,9 +193,9 @@ class WhaleOS {
             <div class="window-content">
                 <div class="loading-message">
                     <div class="loading-spinner">⏳</div>
-                    <p>Loading Claude Code terminal...</p>
+                    <p>Loading terminal...</p>
                 </div>
-                <iframe src="http://localhost:${containerData.port}" style="display:none;"></iframe>
+                <iframe src="${window.location.protocol}//${window.location.hostname}:${containerData.port}" style="display:none;"></iframe>
             </div>
             <div class="resize-handle"></div>
         `;
