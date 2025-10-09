@@ -33,19 +33,39 @@
             </div>
         </div>
 
-        <!-- Taskbar -->
+        <!-- Top Navigation Bar -->
         <div class="taskbar">
             <div class="taskbar-left">
                 <div class="start-button">
                     <span class="whale-logo">🌊</span>
                     <span>ProteOS</span>
                 </div>
-                <div class="taskbar-apps" id="taskbar-apps"></div>
+                <div class="menu-items">
+                    <div class="menu-item" id="settings-menu">
+                        <span class="menu-item-icon">⚙️</span>
+                        <span>Settings</span>
+                    </div>
+                    <div class="menu-item" id="folders-menu">
+                        <span class="menu-item-icon">📁</span>
+                        <span>Folders</span>
+                    </div>
+                    <div class="menu-item" id="help-menu">
+                        <span class="menu-item-icon">🛟</span>
+                        <span>Help</span>
+                    </div>
+                    <div class="menu-item" id="bugs-menu">
+                        <span class="menu-item-icon">🐛</span>
+                        <span>Submit Bugs</span>
+                    </div>
+                </div>
             </div>
             <div class="taskbar-right">
                 <div class="system-tray">
-                    <span class="tray-item" id="container-count">Containers: 0</span>
-                    <span class="tray-item" id="clock">00:00</span>
+                    <span class="tray-item url-badge">
+                        <span class="icon">🌐</span>
+                        <span id="url-display">http://localhost:3001</span>
+                    </span>
+                    <span class="tray-item" id="clock">Tue Aug 31 11:40</span>
                 </div>
             </div>
         </div>

@@ -5,28 +5,68 @@
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
     overflow: hidden;
     height: 100vh;
-    background: #1e1e1e;
+    background: #0a1929;
 }
 
 /* Desktop */
 .desktop {
     width: 100vw;
     height: 100vh;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(180deg, #1a4d5e 0%, #0a1929 50%, #050d16 100%);
     position: relative;
     overflow: hidden;
 }
 
+/* Ocean particle effect */
+.desktop::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+        radial-gradient(2px 2px at 20% 30%, white, transparent),
+        radial-gradient(2px 2px at 60% 70%, white, transparent),
+        radial-gradient(1px 1px at 50% 50%, white, transparent),
+        radial-gradient(1px 1px at 80% 10%, white, transparent),
+        radial-gradient(2px 2px at 90% 60%, white, transparent),
+        radial-gradient(1px 1px at 33% 80%, white, transparent),
+        radial-gradient(1px 1px at 15% 60%, white, transparent);
+    background-size: 200% 200%;
+    background-position: 0% 0%;
+    animation: drift 60s ease-in-out infinite;
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+/* Whale silhouette */
+.desktop::after {
+    content: '🐋';
+    position: absolute;
+    left: 5%;
+    bottom: 15%;
+    font-size: 120px;
+    opacity: 0.15;
+    filter: blur(2px);
+    pointer-events: none;
+    transform: rotate(-15deg);
+}
+
+@keyframes drift {
+    0%, 100% { background-position: 0% 0%; }
+    50% { background-position: 100% 100%; }
+}
+
 /* Desktop Icons */
 .desktop-icons {
-    padding: 20px;
+    padding: 60px 20px 20px 20px;
     display: grid;
     grid-template-columns: repeat(auto-fill, 100px);
     gap: 30px;
     align-content: start;
+    position: relative;
+    z-index: 1;
 }
 
 .desktop-icon {
@@ -63,49 +103,88 @@ body {
     background: rgba(255,255,255,0.2);
 }
 
-/* Taskbar */
+/* Top Navigation Bar (Taskbar) */
 .taskbar {
     position: absolute;
-    bottom: 0;
+    top: 0;
     left: 0;
     right: 0;
-    height: 48px;
-    background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(10px);
+    height: 36px;
+    background: rgba(33, 39, 54, 0.8);
+    backdrop-filter: blur(32px);
+    -webkit-backdrop-filter: blur(32px);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 12px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 0 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     z-index: 1000;
+    border-radius: 8px 8px 0 0;
 }
 
 .taskbar-left {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 21px;
     flex: 1;
 }
 
+/* Logo section */
 .start-button {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 6px 16px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 6px;
+    gap: 12px;
+    padding: 0;
+    background: transparent;
+    border: none;
     color: white;
-    font-weight: 600;
+    font-weight: 700;
+    font-size: 14px;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: opacity 0.2s;
 }
 
 .start-button:hover {
-    background: rgba(255, 255, 255, 0.2);
+    opacity: 0.8;
 }
 
 .whale-logo {
     font-size: 20px;
+    width: 25.5px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Menu items */
+.menu-items {
+    display: flex;
+    gap: 32px;
+    align-items: center;
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: white;
+    font-size: 13px;
+    font-weight: 400;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.menu-item:hover {
+    opacity: 0.7;
+}
+
+.menu-item-icon {
+    width: 12px;
+    height: 12px;
+    opacity: 0.9;
 }
 
 .taskbar-apps {
@@ -150,28 +229,50 @@ body {
 .taskbar-right {
     display: flex;
     align-items: center;
+    gap: 24px;
+    height: 100%;
 }
 
 .system-tray {
     display: flex;
-    gap: 16px;
+    gap: 24px;
     color: white;
     font-size: 13px;
+    align-items: center;
+}
+
+/* URL badge with glassmorphism */
+.tray-item.url-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 20px;
+    background: rgba(33, 39, 54, 0.8);
+    backdrop-filter: blur(32px);
+    -webkit-backdrop-filter: blur(32px);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.tray-item.url-badge .icon {
+    width: 16px;
+    height: 16px;
+    opacity: 0.9;
 }
 
 .tray-item {
-    padding: 6px 12px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 6px;
+    color: white;
+    font-weight: 400;
+    white-space: nowrap;
 }
 
 /* Windows */
 #windows-container {
     position: absolute;
-    top: 0;
+    top: 36px;
     left: 0;
     right: 0;
-    bottom: 48px;
+    bottom: 0;
     pointer-events: none;
 }
 

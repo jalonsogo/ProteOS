@@ -47,6 +47,19 @@ class WhaleOS {
             this.showAboutModal();
         });
 
+        // Menu items
+        document.getElementById('folders-menu')?.addEventListener('click', () => {
+            this.showFileBrowser();
+        });
+
+        document.getElementById('help-menu')?.addEventListener('click', () => {
+            this.showAboutModal();
+        });
+
+        document.getElementById('bugs-menu')?.addEventListener('click', () => {
+            window.open('https://github.com/jalonsogo/ProteOS/issues', '_blank');
+        });
+
         // Modal close buttons
         document.querySelectorAll('.modal-close').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -309,7 +322,7 @@ class WhaleOS {
             windowEl.dataset.oldTop = windowEl.style.top;
 
             windowEl.style.width = '100%';
-            windowEl.style.height = 'calc(100vh - 48px)';
+            windowEl.style.height = 'calc(100vh - 36px)';
             windowEl.style.left = '0';
             windowEl.style.top = '0';
             windowEl.dataset.maximized = 'true';
@@ -387,16 +400,19 @@ class WhaleOS {
 
     updateClock() {
         const now = new Date();
-        const timeString = now.toLocaleTimeString('en-US', {
+        const dateString = now.toLocaleString('en-US', {
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric',
             hour: '2-digit',
-            minute: '2-digit'
-        });
-        document.getElementById('clock').textContent = timeString;
+            minute: '2-digit',
+            hour12: false
+        }).replace(',', '');
+        document.getElementById('clock').textContent = dateString;
     }
 
     updateContainerCount() {
-        document.getElementById('container-count').textContent =
-            `Containers: ${this.containers.size}`;
+        // Container count removed from new design
     }
 
     async loadContainers() {
