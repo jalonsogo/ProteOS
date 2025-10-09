@@ -1,5 +1,5 @@
-# WhaleOS - Containerized Distribution
-# This container runs the WhaleOS server and manages Docker containers via Docker socket
+# ProteOS - Containerized Distribution
+# This container runs the ProteOS server and manages Docker containers via Docker socket
 FROM node:20-alpine
 
 # Install Docker CLI (not Docker daemon - we'll use host's Docker via socket)
