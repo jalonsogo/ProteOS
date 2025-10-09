@@ -16,10 +16,17 @@
 
 ## ✨ Features
 
+### 🌊 Ocean-Themed UI Design
+- **Deep Ocean Aesthetic**: Immersive underwater gradient background with particle effects
+- **Professional Icons**: Clean Lucide SVG icons throughout the interface
+- **Glassmorphism Effects**: Modern backdrop blur and translucent elements
+- **Dynamic Background**: Custom PNG background support with gradient overlay
+
 ### 🖥️ Desktop OS Experience
-- **Familiar Interface**: Icons, windows, taskbar just like a real OS
-- **Multi-Window Management**: Drag, resize, minimize, maximize
+- **Familiar Interface**: Icons, windows, top navigation bar just like a real OS
+- **Multi-Window Management**: Drag, resize, minimize, maximize multiple containers
 - **Persistent Sessions**: Your work survives container restarts
+- **Unlimited Instances**: Spawn multiple instances of the same AI provider concurrently
 
 ### 🎭 Multi-AI Provider Support
 - **🐋 Claude Code** (Anthropic Claude 3.5 Sonnet)
@@ -36,6 +43,12 @@
 - **File Browser**: View and manage files across all containers
 - **Easy Access**: Files stored locally in `workspace/containers/`
 
+### 📊 System Monitoring
+- **Live System Logs**: Dedicated window showing real-time operations and events
+- **Log Filtering**: Filter logs by level (Info, Success, Warning, Error)
+- **Auto-Scroll**: Optional automatic scrolling to latest log entries
+- **Debug Visibility**: Track container creation, connections, and failures instantly
+
 ### 🌐 Web-Based
 - **No Installation**: Access from any browser
 - **Remote Access**: Run on server, access from anywhere
@@ -48,9 +61,10 @@ ProteOS/
 ├── server/
 │   └── index.js          # Express server + Docker orchestration
 ├── public/
-│   ├── index.html        # Desktop UI
-│   ├── styles.css        # OS-like styling
-│   └── app.js            # Window manager + API client
+│   ├── index.html        # Desktop UI with Lucide icons
+│   ├── styles.css        # Ocean-themed styling with glassmorphism
+│   ├── app.js            # Window manager + logging system + API client
+│   └── background.png    # Ocean background image (19MB)
 ├── dockerfile            # Claude Code image
 ├── dockerfile.gemini     # Gemini CLI image
 ├── dockerfile.openai     # OpenAI Codex image
@@ -121,35 +135,50 @@ PORT=3000
 ### Launching AI Terminals
 
 1. Click any AI provider icon on the desktop:
-   - **🐋 Claude Code** — Anthropic's Claude
-   - **🔷 Gemini CLI** — Google's Gemini
-   - **⚡ OpenAI Codex** — OpenAI's GPT
+   - **Claude Code** (bot icon) — Anthropic's Claude
+   - **Gemini CLI** (sparkles icon) — Google's Gemini
+   - **OpenAI Codex** (zap icon) — OpenAI's GPT
 
 2. Wait 3-5 seconds for container startup
 
 3. Start coding with AI assistance!
 
+4. Launch multiple instances of the same provider for parallel workflows
+
 ### Window Management
 
 - **Drag**: Click title bar to move windows
 - **Resize**: Drag bottom-right corner
-- **Minimize**: Yellow `−` button
-- **Maximize**: Green `□` button
-- **Close**: Red `×` button (stops container)
+- **Minimize**: Yellow `−` button (window hidden but container runs)
+- **Maximize**: Green `□` button (fullscreen view)
+- **Close**: Red `×` button (stops container permanently)
+- **Bring to Front**: Click any window to focus it
+
+### System Logs
+
+- Click **System Logs** icon (terminal icon) on desktop
+- Opens dedicated window showing all system events
+- **Filter logs**: Click Info/Success/Warning/Error buttons
+- **Clear logs**: Trash icon clears all entries
+- **Auto-scroll**: Toggle to follow latest logs (arrow icon)
+- Monitor container creation, connections, and failures in real-time
 
 ### File Browser
 
-- Click **📁 Files** icon
+- Click **Files** icon (folder icon) on desktop
 - Select a container from dropdown
 - Navigate directories and view files
 - All files persisted in `workspace/containers/`
 
-### Taskbar
+### Top Navigation Bar
 
-- Active windows shown as taskbar buttons
-- Click to restore minimized windows
-- Real-time container count
-- System clock
+- **ProteOS Logo**: Shows system branding
+- **Settings**: Configure system preferences
+- **Folders**: Quick access to workspace directories
+- **Help**: Documentation and support
+- **Submit Bugs**: Report issues on GitHub
+- **URL Badge**: Current server address (e.g., http://localhost:3001)
+- **System Clock**: Real-time clock display
 
 ## 🎯 AI Provider Comparison
 
@@ -248,13 +277,21 @@ sudo usermod -aG docker $USER
 - [x] Persistent file storage
 - [x] File browser and viewer
 - [x] Docker Compose deployment
+- [x] Ocean-themed UI design
+- [x] Lucide icon integration
+- [x] System log viewer window
+- [x] Multiple concurrent instances per provider
+- [x] Dynamic port allocation
+- [x] Glassmorphism effects
 - [ ] User authentication
-- [ ] Container resource monitoring
+- [ ] Container resource monitoring dashboard
 - [ ] Container templates/presets
 - [ ] Mobile responsive design
-- [ ] Dark/light theme toggle
+- [ ] Theme customization (background images, colors)
 - [ ] Keyboard shortcuts
 - [ ] Session recording/playback
+- [ ] Drag-and-drop file uploads
+- [ ] Terminal command history
 
 ## 🤝 Contributing
 
@@ -279,6 +316,7 @@ MIT License - See [LICENSE](LICENSE) file
 - [ttyd](https://github.com/tsl0922/ttyd) for web terminals
 - [Docker](https://docker.com) for containerization
 - [Express](https://expressjs.com) for the server
+- [Lucide](https://lucide.dev) for beautiful SVG icons
 
 ---
 
