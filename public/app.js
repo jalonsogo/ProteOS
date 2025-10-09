@@ -1450,34 +1450,22 @@ class ProteOS {
                 throw new Error('Container not found');
             }
 
-            this.addLog('info', `Opening local iTerm for ${containerData.name}...`);
-            this.showNotification('Opening iTerm on your local machine...');
+            this.addLog('info', `Opening terminal in new tab for ${containerData.name}...`);
+            this.showNotification('Opening terminal in new tab...');
 
-            // Get the current working directory from the page origin
-            // Extract the workspace path - need to convert container path to host path
-            // Container ID from the containerData
-            const containerIdMatch = containerId.match(/^(claude|gemini|openai)-\d+$/);
-            if (!containerIdMatch) {
-                throw new Error('Invalid container ID format');
-            }
+            // Get the terminal URL from the container data
+            // The terminal is accessible at localhost:<port> via ttyd
+            const terminalUrl = `${window.location.protocol}//localhost:${containerData.port}`;
 
-            // Build the local workspace path
-            // Assuming ProteOS is at /Users/javieralonso/Code/ProteOS
-            // and workspace is at ./workspace/containers/<containerId>
-            const localWorkspacePath = `/Users/javieralonso/Code/ProteOS/workspace/containers/${containerId}`;
+            // Open the terminal in a new browser tab
+            window.open(terminalUrl, '_blank');
 
-            // Create iTerm2 URL scheme to open terminal at the workspace directory
-            const itermUrl = `iterm2://open?path=${encodeURIComponent(localWorkspacePath)}`;
-
-            // Open the URL - this will trigger iTerm on the user's local machine
-            window.location.href = itermUrl;
-
-            this.addLog('success', `Opening iTerm at ${localWorkspacePath}`);
-            this.showNotification('iTerm should open on your local machine');
+            this.addLog('success', `Terminal opened for ${containerData.name} at ${terminalUrl}`);
+            this.showNotification('Terminal opened in new tab');
         } catch (error) {
             console.error('Error opening local terminal:', error);
             this.addLog('error', `Failed to open local terminal: ${error.message}`);
-            this.showNotification('Failed to open local terminal. Make sure iTerm is installed.', true);
+            this.showNotification('Failed to open local terminal', true);
         }
     }
 }
