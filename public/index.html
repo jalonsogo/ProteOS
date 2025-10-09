@@ -28,6 +28,10 @@
                 <div class="icon-image"><i data-lucide="folder"></i></div>
                 <div class="icon-label">Files</div>
             </div>
+            <div class="desktop-icon" id="logs-icon" title="View System Logs">
+                <div class="icon-image"><i data-lucide="terminal"></i></div>
+                <div class="icon-label">System Logs</div>
+            </div>
             <div class="desktop-icon" id="about-icon" title="About ProteOS">
                 <div class="icon-image"><i data-lucide="info"></i></div>
                 <div class="icon-label">About</div>
@@ -135,6 +139,43 @@
             </div>
             <div class="modal-body">
                 <pre id="file-content"></pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Logs Modal -->
+    <div class="modal" id="logs-modal">
+        <div class="modal-content logs-modal">
+            <div class="modal-header">
+                <h2>
+                    <i data-lucide="terminal" style="width: 18px; height: 18px; display: inline-block; vertical-align: middle; margin-right: 8px;"></i>
+                    ProteOS System Logs
+                </h2>
+                <div style="display: flex; gap: 12px; align-items: center;">
+                    <button class="log-control-btn" id="clear-logs-btn" title="Clear logs">
+                        <i data-lucide="trash-2"></i>
+                    </button>
+                    <button class="log-control-btn" id="auto-scroll-btn" title="Auto-scroll" data-active="true">
+                        <i data-lucide="arrow-down"></i>
+                    </button>
+                    <button class="modal-close" data-modal="logs">&times;</button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="log-filters">
+                    <button class="log-filter-btn active" data-level="all">All</button>
+                    <button class="log-filter-btn" data-level="info">Info</button>
+                    <button class="log-filter-btn" data-level="success">Success</button>
+                    <button class="log-filter-btn" data-level="warning">Warning</button>
+                    <button class="log-filter-btn" data-level="error">Error</button>
+                </div>
+                <div class="log-viewer" id="log-viewer">
+                    <div class="log-entry log-info">
+                        <span class="log-time">--:--:--</span>
+                        <span class="log-level">INFO</span>
+                        <span class="log-message">ProteOS System Logs initialized</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

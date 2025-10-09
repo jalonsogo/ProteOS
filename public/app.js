@@ -4,6 +4,9 @@ class WhaleOS {
         this.containers = new Map();
         this.windows = new Map();
         this.zIndexCounter = 100;
+        this.logs = [];
+        this.currentLogFilter = 'all';
+        this.autoScroll = true;
         this.init();
     }
 
@@ -47,6 +50,11 @@ class WhaleOS {
             this.showAboutModal();
         });
 
+        // Logs icon
+        document.getElementById('logs-icon').addEventListener('click', () => {
+            this.showLogViewer();
+        });
+
         // Menu items
         document.getElementById('folders-menu')?.addEventListener('click', () => {
             this.showFileBrowser();
@@ -67,6 +75,7 @@ class WhaleOS {
                 if (modalType === 'about') this.hideAboutModal();
                 if (modalType === 'files') this.hideFileBrowser();
                 if (modalType === 'file-viewer') this.hideFileViewer();
+                if (modalType === 'logs') this.hideLogViewer();
             });
         });
 
@@ -79,6 +88,28 @@ class WhaleOS {
         });
         document.getElementById('file-viewer-modal').addEventListener('click', (e) => {
             if (e.target.id === 'file-viewer-modal') this.hideFileViewer();
+        });
+        document.getElementById('logs-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'logs-modal') this.hideLogViewer();
+        });
+
+        // Log viewer controls
+        document.getElementById('clear-logs-btn')?.addEventListener('click', () => {
+            this.clearLogs();
+        });
+
+        document.getElementById('auto-scroll-btn')?.addEventListener('click', (e) => {
+            this.autoScroll = !this.autoScroll;
+            e.currentTarget.dataset.active = this.autoScroll;
+        });
+
+        document.querySelectorAll('.log-filter-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.log-filter-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                this.currentLogFilter = e.target.dataset.level;
+                this.filterLogs();
+            });
         });
 
         // File browser controls
@@ -99,27 +130,28 @@ class WhaleOS {
                 claude: {
                     name: 'Claude Terminal',
                     emoji: '🐋',
-                    loading: '🐋 Launching Claude Code container...',
-                    ready: '✓ Claude Code ready!'
+                    loading: 'Launching Claude Code container...',
+                    ready: 'Claude Code ready!'
                 },
                 gemini: {
                     name: 'Gemini Terminal',
                     emoji: '🔷',
-                    loading: '🔷 Launching Gemini CLI container...',
-                    ready: '✓ Gemini CLI ready!'
+                    loading: 'Launching Gemini CLI container...',
+                    ready: 'Gemini CLI ready!'
                 },
                 openai: {
                     name: 'OpenAI Codex Terminal',
                     emoji: '⚡',
-                    loading: '⚡ Launching OpenAI Codex container...',
-                    ready: '✓ OpenAI Codex ready!'
+                    loading: 'Launching OpenAI Codex container...',
+                    ready: 'OpenAI Codex ready!'
                 }
             };
 
             const config = containerTypes[type];
             const containerName = `${config.name} ${this.containers.size + 1}`;
 
-            // Show loading notification
+            // Log and show loading
+            this.addLog('info', config.loading);
             this.showNotification(config.loading);
 
             const response = await fetch('/api/containers/create', {
@@ -132,22 +164,26 @@ class WhaleOS {
             });
 
             if (!response.ok) {
-                throw new Error('Failed to create container');
+                const errorText = await response.text();
+                throw new Error(`Failed to create container: ${errorText}`);
             }
 
             const data = await response.json();
             this.containers.set(data.id, data);
+            this.addLog('success', `Container created: ${containerName} (ID: ${data.id})`);
 
             // Wait a bit for container to be ready
             setTimeout(() => {
                 this.createWindow(data, config.emoji);
                 this.showNotification(config.ready);
+                this.addLog('success', config.ready);
             }, 3000);
 
             this.updateContainerCount();
         } catch (error) {
             console.error('Error creating container:', error);
-            this.showNotification('❌ Failed to create container', true);
+            this.addLog('error', `Failed to create container: ${error.message}`);
+            this.showNotification('Failed to create container', true);
         }
     }
 
@@ -332,6 +368,9 @@ class WhaleOS {
     async closeWindow(windowEl, windowId) {
         if (confirm('Close this Claude Code terminal? The container will be stopped.')) {
             try {
+                const containerName = this.containers.get(windowId)?.name || windowId;
+                this.addLog('info', `Stopping container: ${containerName}`);
+
                 // Remove window
                 windowEl.remove();
                 this.windows.delete(windowId);
@@ -341,15 +380,22 @@ class WhaleOS {
                 if (taskbarBtn) taskbarBtn.remove();
 
                 // Stop container
-                await fetch(`/api/containers/${windowId}`, {
+                const response = await fetch(`/api/containers/${windowId}`, {
                     method: 'DELETE'
                 });
 
+                if (!response.ok) {
+                    throw new Error('Failed to stop container');
+                }
+
                 this.containers.delete(windowId);
                 this.updateContainerCount();
+                this.addLog('success', `Container stopped: ${containerName}`);
                 this.showNotification('Container stopped');
             } catch (error) {
                 console.error('Error closing window:', error);
+                this.addLog('error', `Failed to stop container: ${error.message}`);
+                this.showNotification('Error stopping container', true);
             }
         }
     }
@@ -610,10 +656,122 @@ class WhaleOS {
         const i = Math.floor(Math.log(bytes) / Math.log(k));
         return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
     }
+
+    // System Log Methods
+    addLog(level, message) {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+        });
+
+        const logEntry = {
+            time: timeString,
+            level: level, // 'info', 'success', 'warning', 'error'
+            message: message,
+            timestamp: now
+        };
+
+        this.logs.push(logEntry);
+
+        // Also log to console
+        const emoji = {
+            info: 'ℹ️',
+            success: '✓',
+            warning: '⚠️',
+            error: '❌'
+        };
+        console.log(`${emoji[level]} [${timeString}] ${message}`);
+
+        // Update UI if log viewer is open
+        if (document.getElementById('logs-modal').classList.contains('active')) {
+            this.appendLogToUI(logEntry);
+        }
+    }
+
+    appendLogToUI(logEntry) {
+        const logViewer = document.getElementById('log-viewer');
+        const logElement = document.createElement('div');
+        logElement.className = `log-entry log-${logEntry.level}`;
+        logElement.dataset.level = logEntry.level;
+
+        logElement.innerHTML = `
+            <span class="log-time">${logEntry.time}</span>
+            <span class="log-level">${logEntry.level}</span>
+            <span class="log-message">${logEntry.message}</span>
+        `;
+
+        logViewer.appendChild(logElement);
+
+        // Auto-scroll to bottom if enabled
+        if (this.autoScroll) {
+            logViewer.scrollTop = logViewer.scrollHeight;
+        }
+
+        // Apply current filter
+        if (this.currentLogFilter !== 'all' && logEntry.level !== this.currentLogFilter) {
+            logElement.classList.add('hidden');
+        }
+    }
+
+    showLogViewer() {
+        const modal = document.getElementById('logs-modal');
+        modal.classList.add('active');
+
+        // Populate with existing logs
+        const logViewer = document.getElementById('log-viewer');
+        logViewer.innerHTML = '';
+        this.logs.forEach(log => this.appendLogToUI(log));
+
+        // Scroll to bottom
+        if (this.autoScroll) {
+            logViewer.scrollTop = logViewer.scrollHeight;
+        }
+
+        // Re-initialize Lucide icons in the modal
+        setTimeout(() => lucide.createIcons(), 100);
+    }
+
+    hideLogViewer() {
+        document.getElementById('logs-modal').classList.remove('active');
+    }
+
+    clearLogs() {
+        if (confirm('Clear all system logs?')) {
+            this.logs = [];
+            document.getElementById('log-viewer').innerHTML = `
+                <div class="log-entry log-info">
+                    <span class="log-time">${new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}</span>
+                    <span class="log-level">INFO</span>
+                    <span class="log-message">Logs cleared</span>
+                </div>
+            `;
+            this.addLog('info', 'System logs cleared');
+        }
+    }
+
+    filterLogs() {
+        const logEntries = document.querySelectorAll('.log-entry');
+        logEntries.forEach(entry => {
+            if (this.currentLogFilter === 'all') {
+                entry.classList.remove('hidden');
+            } else {
+                if (entry.dataset.level === this.currentLogFilter) {
+                    entry.classList.remove('hidden');
+                } else {
+                    entry.classList.add('hidden');
+                }
+            }
+        });
+    }
 }
 
 // Initialize WhaleOS when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     window.whaleOS = new WhaleOS();
-    console.log('🐋 WhaleOS Desktop initialized');
+    console.log('🐋 ProteOS Desktop initialized');
+    window.whaleOS.addLog('info', 'ProteOS System initialized - Shape-shifting AI platform ready');
+    window.whaleOS.addLog('info', `Server URL: ${window.location.origin}`);
 });
