@@ -1451,29 +1451,33 @@ class ProteOS {
             }
 
             this.addLog('info', `Opening local iTerm for ${containerData.name}...`);
-            this.showNotification('Opening local iTerm terminal...');
+            this.showNotification('Opening iTerm on your local machine...');
 
-            const response = await fetch('/api/terminal/local', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    containerId: containerId,
-                    workspacePath: containerData.workspaceDir
-                })
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Failed to open local terminal');
+            // Get the current working directory from the page origin
+            // Extract the workspace path - need to convert container path to host path
+            // Container ID from the containerData
+            const containerIdMatch = containerId.match(/^(claude|gemini|openai)-\d+$/);
+            if (!containerIdMatch) {
+                throw new Error('Invalid container ID format');
             }
 
-            const data = await response.json();
-            this.addLog('success', `Local iTerm opened for ${containerData.name}`);
-            this.showNotification('Local iTerm terminal opened');
+            // Build the local workspace path
+            // Assuming ProteOS is at /Users/javieralonso/Code/ProteOS
+            // and workspace is at ./workspace/containers/<containerId>
+            const localWorkspacePath = `/Users/javieralonso/Code/ProteOS/workspace/containers/${containerId}`;
+
+            // Create iTerm2 URL scheme to open terminal at the workspace directory
+            const itermUrl = `iterm2://open?path=${encodeURIComponent(localWorkspacePath)}`;
+
+            // Open the URL - this will trigger iTerm on the user's local machine
+            window.location.href = itermUrl;
+
+            this.addLog('success', `Opening iTerm at ${localWorkspacePath}`);
+            this.showNotification('iTerm should open on your local machine');
         } catch (error) {
             console.error('Error opening local terminal:', error);
             this.addLog('error', `Failed to open local terminal: ${error.message}`);
-            this.showNotification('Failed to open local terminal', true);
+            this.showNotification('Failed to open local terminal. Make sure iTerm is installed.', true);
         }
     }
 }
