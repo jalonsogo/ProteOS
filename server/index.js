@@ -28,17 +28,17 @@ app.use(express.static(join(__dirname, '../public')));
 // Image configurations
 const imageConfigs = {
   claude: {
-    name: 'proteos-claude',
+    name: 'whaleos-claude',
     dockerfile: 'dockerfile',
     env: 'ANTHROPIC_API_KEY'
   },
   gemini: {
-    name: 'proteos-gemini',
+    name: 'whaleos-gemini',
     dockerfile: 'dockerfile.gemini',
     env: 'GEMINI_API_KEY'
   },
   openai: {
-    name: 'proteos-openai',
+    name: 'whaleos-openai',
     dockerfile: 'dockerfile.openai',
     env: 'OPENAI_API_KEY'
   }
