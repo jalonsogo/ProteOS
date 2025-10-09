@@ -84,12 +84,9 @@ app.post('/api/containers/create', async (req, res) => {
     const containerId = `${type}-${Date.now()}`;
     const containerName = req.body.name || `${type.charAt(0).toUpperCase() + type.slice(1)} Terminal ${containers.size + 1}`;
 
-    // Find an available port starting from 7681
-    const usedPorts = new Set(Array.from(containers.values()).map(c => c.port));
-    let port = 7681;
-    while (usedPorts.has(port)) {
-      port++;
-    }
+    // Find next available port by getting the highest used port and incrementing
+    const usedPorts = Array.from(containers.values()).map(c => c.port);
+    const port = usedPorts.length > 0 ? Math.max(...usedPorts) + 1 : 7681;
 
     // Create persistent workspace directory for this container
     const workspaceDir = join(__dirname, '..', 'workspace', 'containers', containerId);
