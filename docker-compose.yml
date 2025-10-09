@@ -1,9 +1,9 @@
 version: '3.8'
 
 services:
-  whaleos:
+  proteos:
     build: .
-    container_name: whaleos
+    container_name: proteos
     ports:
       - "3000:3000"
     volumes:
@@ -18,8 +18,8 @@ services:
       - PORT=3000
     restart: unless-stopped
     networks:
-      - whaleos-network
+      - proteos-network
 
 networks:
-  whaleos-network:
+  proteos-network:
     driver: bridge

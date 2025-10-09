@@ -1,14 +1,14 @@
 {
-  "name": "whaleos",
+  "name": "proteos",
   "version": "1.0.0",
-  "description": "Desktop OS-like web UI for managing containerized Claude Code instances",
+  "description": "ProteOS (P/OS) - Shape-shifting multi-AI provider platform. Seamlessly switch between Claude, Gemini, and OpenAI in Docker containers.",
   "main": "server/index.js",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
     "dev": "node --watch server/index.js"
   },
-  "keywords": ["docker", "claude-code", "web-os", "terminal"],
+  "keywords": ["docker", "claude-code", "gemini-cli", "openai-codex", "multi-ai", "web-os", "terminal", "containerization", "proteus"],
   "author": "",
   "license": "MIT",
   "dependencies": {

@@ -1,12 +1,12 @@
-# WhaleOS Deployment Guide
+# ProteOS Deployment Guide
 
-WhaleOS offers multiple deployment methods to suit different use cases.
+ProteOS offers multiple deployment methods to suit different use cases.
 
 ## 📦 Deployment Options
 
 ### Option 1: Docker Compose (Recommended)
 
-The easiest way to run WhaleOS in production.
+The easiest way to run ProteOS in production.
 
 **Pros:**
 - ✅ One command deployment
@@ -20,13 +20,13 @@ The easiest way to run WhaleOS in production.
 ```bash
 # 1. Clone the repository
 git clone <your-repo-url>
-cd WhaleOS
+cd ProteOS
 
 # 2. Create .env file with your API keys
 cp .env.example .env
 nano .env  # Add your actual API keys
 
-# 3. Start WhaleOS
+# 3. Start ProteOS
 docker-compose up -d
 
 # 4. Access at http://localhost:3000
@@ -58,18 +58,18 @@ For manual Docker deployment without compose.
 
 ```bash
 # Build the image
-docker build -t whaleos:latest .
+docker build -t proteos:latest .
 
 # Run the container
 docker run -d \
-  --name whaleos \
+  --name proteos \
   -p 3000:3000 \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v $(pwd)/workspace:/workspace \
   -e ANTHROPIC_API_KEY=your-key \
   -e GEMINI_API_KEY=your-key \
   -e OPENAI_API_KEY=your-key \
-  whaleos:latest
+  proteos:latest
 ```
 
 ---
@@ -105,7 +105,7 @@ npm start
 - Rotate keys regularly
 
 ### Docker Socket Access
-WhaleOS needs access to Docker socket to manage containers:
+ProteOS needs access to Docker socket to manage containers:
 ```bash
 -v /var/run/docker.sock:/var/run/docker.sock
 ```
@@ -161,19 +161,19 @@ your-domain.com {
 
 ```bash
 # Build and tag
-docker build -t yourusername/whaleos:latest .
+docker build -t yourusername/proteos:latest .
 
 # Push to Docker Hub
-docker push yourusername/whaleos:latest
+docker push yourusername/proteos:latest
 
 # Others can pull and run
-docker pull yourusername/whaleos:latest
+docker pull yourusername/proteos:latest
 docker run -d -p 3000:3000 \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -e ANTHROPIC_API_KEY=xxx \
   -e GEMINI_API_KEY=xxx \
   -e OPENAI_API_KEY=xxx \
-  yourusername/whaleos:latest
+  yourusername/proteos:latest
 ```
 
 ### AWS/DigitalOcean/GCP
@@ -188,7 +188,7 @@ docker run -d -p 3000:3000 \
 
 ## 🔄 Updates and Maintenance
 
-### Updating WhaleOS
+### Updating ProteOS
 
 **Docker Compose:**
 ```bash
@@ -199,10 +199,10 @@ docker-compose up -d --build
 
 **Docker Run:**
 ```bash
-docker stop whaleos
-docker rm whaleos
+docker stop proteos
+docker rm proteos
 git pull
-docker build -t whaleos:latest .
+docker build -t proteos:latest .
 docker run -d ... # your run command
 ```
 
@@ -210,10 +210,10 @@ docker run -d ... # your run command
 
 ```bash
 # Backup workspace
-tar -czf whaleos-backup-$(date +%Y%m%d).tar.gz workspace/
+tar -czf proteos-backup-$(date +%Y%m%d).tar.gz workspace/
 
 # Restore
-tar -xzf whaleos-backup-20251008.tar.gz
+tar -xzf proteos-backup-20251008.tar.gz
 ```
 
 ---
@@ -222,7 +222,7 @@ tar -xzf whaleos-backup-20251008.tar.gz
 
 ### Health Check
 
-WhaleOS includes a built-in health check:
+ProteOS includes a built-in health check:
 ```bash
 curl http://localhost:3000
 ```
@@ -230,7 +230,7 @@ curl http://localhost:3000
 ### Docker Health Status
 
 ```bash
-docker ps --filter "name=whaleos" --format "table {{.Names}}\t{{.Status}}"
+docker ps --filter "name=proteos" --format "table {{.Names}}\t{{.Status}}"
 ```
 
 ### Logs
@@ -240,7 +240,7 @@ docker ps --filter "name=whaleos" --format "table {{.Names}}\t{{.Status}}"
 docker-compose logs -f
 
 # Docker Run
-docker logs -f whaleos
+docker logs -f proteos
 
 # Native
 # Logs go to console
@@ -254,7 +254,7 @@ docker logs -f whaleos
 
 ```bash
 # Check logs
-docker logs whaleos
+docker logs proteos
 
 # Common issues:
 # 1. Port already in use
@@ -266,10 +266,10 @@ docker logs whaleos
 
 ```bash
 # Verify Docker socket is mounted
-docker exec whaleos docker ps
+docker exec proteos docker ps
 
 # Check API keys are set
-docker exec whaleos env | grep API_KEY
+docker exec proteos env | grep API_KEY
 ```
 
 ### Permission Denied Errors
@@ -291,7 +291,7 @@ sudo usermod -aG docker $USER
 3. **Set resource limits** in production:
    ```yaml
    services:
-     whaleos:
+     proteos:
        deploy:
          resources:
            limits:

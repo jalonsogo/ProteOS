@@ -28,17 +28,17 @@ app.use(express.static(join(__dirname, '../public')));
 // Image configurations
 const imageConfigs = {
   claude: {
-    name: 'whaleos-claude',
+    name: 'proteos-claude',
     dockerfile: 'dockerfile',
     env: 'ANTHROPIC_API_KEY'
   },
   gemini: {
-    name: 'whaleos-gemini',
+    name: 'proteos-gemini',
     dockerfile: 'dockerfile.gemini',
     env: 'GEMINI_API_KEY'
   },
   openai: {
-    name: 'whaleos-openai',
+    name: 'proteos-openai',
     dockerfile: 'dockerfile.openai',
     env: 'OPENAI_API_KEY'
   }
@@ -301,13 +301,14 @@ async function start() {
 
     server.listen(PORT, () => {
       console.log(`
-╔══════════════════════════════════════════╗
-║            WhaleOS Server                ║
-╠══════════════════════════════════════════╣
-║  🐋 Claude  🔷 Gemini  ⚡ OpenAI          ║
-║  🌐 Web UI: http://localhost:${PORT}      ║
-║  🔧 API: http://localhost:${PORT}/api     ║
-╚══════════════════════════════════════════╝
+╔═══════════════════════════════════════════╗
+║       🌊 ProteOS (P/OS) Server 🌊        ║
+║   Shape-shifting AI from the depths      ║
+╠═══════════════════════════════════════════╣
+║  🐋 Claude  🔷 Gemini  ⚡ OpenAI           ║
+║  🌐 Web UI: http://localhost:${PORT}       ║
+║  🔧 API: http://localhost:${PORT}/api      ║
+╚═══════════════════════════════════════════╝
       `);
     });
   } catch (error) {
