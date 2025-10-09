@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import http from 'http';
 import fs from 'fs';
+import { exec } from 'child_process';
 
 dotenv.config();
 
@@ -420,7 +421,6 @@ app.post('/api/settings/api-keys', (req, res) => {
 // Open local iTerm terminal
 app.post('/api/terminal/local', (req, res) => {
   try {
-    const { exec } = require('child_process');
     const { containerId, workspacePath } = req.body;
 
     // Check if running on macOS
