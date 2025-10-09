@@ -510,6 +510,16 @@ body[data-theme="light"] .container-selector label {
     color: white;
 }
 
+.window-control.local-terminal {
+    color: #8b9ef8;
+    background: rgba(139, 158, 248, 0.1);
+}
+
+.window-control.local-terminal:hover {
+    background: rgba(139, 158, 248, 0.2);
+    color: #a3b3ff;
+}
+
 .window-content {
     flex: 1;
     position: relative;

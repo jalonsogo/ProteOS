@@ -16,9 +16,11 @@ const __dirname = dirname(__filename);
 const app = express();
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
-const docker = new Docker();
 
-const PORT = process.env.PORT || 3000;
+// Docker will be initialized asynchronously in start()
+let docker;
+
+const PORT = process.env.PORT || 3001;
 const containers = new Map(); // Store container info: id -> { containerId, port, name }
 
 app.use(cors());
@@ -28,17 +30,17 @@ app.use(express.static(join(__dirname, '../public')));
 // Image configurations
 const imageConfigs = {
   claude: {
-    name: 'whaleos-claude',
+    name: 'proteos-claude',
     dockerfile: 'dockerfile.claude',
     env: 'ANTHROPIC_API_KEY'
   },
   gemini: {
-    name: 'whaleos-gemini',
+    name: 'proteos-gemini',
     dockerfile: 'dockerfile.gemini',
     env: 'GEMINI_API_KEY'
   },
   openai: {
-    name: 'whaleos-openai',
+    name: 'proteos-openai',
     dockerfile: 'dockerfile.openai',
     env: 'OPENAI_API_KEY'
   }
@@ -415,6 +417,83 @@ app.post('/api/settings/api-keys', (req, res) => {
   }
 });
 
+// Open local iTerm terminal
+app.post('/api/terminal/local', (req, res) => {
+  try {
+    const { exec } = require('child_process');
+    const { containerId, workspacePath } = req.body;
+
+    // Check if running on macOS
+    if (process.platform !== 'darwin') {
+      return res.status(400).json({
+        error: 'Local terminal opening is only supported on macOS'
+      });
+    }
+
+    if (!containerId || !workspacePath) {
+      return res.status(400).json({
+        error: 'Container ID and workspace path are required'
+      });
+    }
+
+    // Check if workspace directory exists
+    if (!fs.existsSync(workspacePath)) {
+      return res.status(404).json({
+        error: 'Workspace directory not found'
+      });
+    }
+
+    // Use iTerm2 URL scheme to open a new window in the workspace directory
+    // Format: iterm2://open?path=<absolute_path>
+    const escapedPath = encodeURIComponent(workspacePath);
+    const itermUrl = `iterm2://open?path=${escapedPath}`;
+
+    // Open iTerm with the URL scheme
+    exec(`open "${itermUrl}"`, (error, stdout, stderr) => {
+      if (error) {
+        console.error('Error opening iTerm:', error);
+        // Fallback: try to open iTerm and cd to the directory using AppleScript
+        const appleScript = `
+          tell application "iTerm"
+            activate
+            create window with default profile
+            tell current session of current window
+              write text "cd '${workspacePath.replace(/'/g, "'\\\\''")}'"
+            end tell
+          end tell
+        `;
+
+        exec(`osascript -e '${appleScript.replace(/'/g, "'\\''")}'`, (scriptError) => {
+          if (scriptError) {
+            console.error('Error with AppleScript fallback:', scriptError);
+            return res.status(500).json({
+              error: 'Failed to open iTerm. Make sure iTerm is installed.'
+            });
+          }
+
+          console.log(`✓ Opened local iTerm terminal for ${containerId} at ${workspacePath}`);
+          res.json({
+            success: true,
+            message: 'iTerm terminal opened',
+            path: workspacePath
+          });
+        });
+        return;
+      }
+
+      console.log(`✓ Opened local iTerm terminal for ${containerId} at ${workspacePath}`);
+      res.json({
+        success: true,
+        message: 'iTerm terminal opened',
+        path: workspacePath
+      });
+    });
+  } catch (error) {
+    console.error('Error opening local terminal:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // WebSocket handler for terminal proxy (if needed for custom features)
 wss.on('connection', (ws) => {
   console.log('WebSocket client connected');
@@ -431,6 +510,25 @@ wss.on('connection', (ws) => {
 // Initialize and start server
 async function start() {
   try {
+    // Initialize Docker connection with fallback options
+    console.log('Initializing Docker connection...');
+    try {
+      docker = new Docker({ socketPath: '/var/run/docker.sock' });
+      await docker.ping();
+      console.log('✓ Connected to Docker via /var/run/docker.sock');
+    } catch (error) {
+      console.log('Failed to connect via /var/run/docker.sock, trying alternative...');
+      try {
+        docker = new Docker({ socketPath: '/Users/javieralonso/.docker/run/docker.sock' });
+        await docker.ping();
+        console.log('✓ Connected to Docker via ~/.docker/run/docker.sock');
+      } catch (error2) {
+        console.error('Failed to connect to Docker:', error2.message);
+        console.error('Make sure Docker Desktop is running');
+        process.exit(1);
+      }
+    }
+
     await ensureAllImages();
 
     server.listen(PORT, () => {

@@ -1,32 +1,26 @@
 # Claude Code CLI Container
-FROM ubuntu:22.04
+FROM node:20-alpine
 
-# Prevent interactive prompts during package installation
-ENV DEBIAN_FRONTEND=noninteractive
-
-# Install required dependencies
-RUN apt-get update && apt-get install -y \
+# Install required dependencies (Alpine uses apk, not apt-get)
+RUN apk add --no-cache \
     curl \
     wget \
     git \
-    build-essential \
+    build-base \
     python3 \
-    python3-pip \
+    py3-pip \
     sudo \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install Node.js 20
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y nodejs \
-    && rm -rf /var/lib/apt/lists/*
+    ca-certificates
 
 # Install ttyd for web terminal access
 RUN wget -qO /usr/local/bin/ttyd https://github.com/tsl0922/ttyd/releases/download/1.7.7/ttyd.x86_64 \
     && chmod +x /usr/local/bin/ttyd
 
+# Install bash for Alpine
+RUN apk add --no-cache bash
+
 # Install Claude Code CLI
-RUN npm install -g @anthropic-ai/claude-code-cli
+RUN npm install -g @anthropic-ai/claude-code
 
 # Create working directory
 WORKDIR /workspace
@@ -37,5 +31,5 @@ EXPOSE 7681
 # Set environment variable for API key (will be passed at runtime)
 ENV ANTHROPIC_API_KEY=""
 
-# Start ttyd with Claude Code CLI automatically
+# Start ttyd with Claude CLI
 CMD ["ttyd", "-p", "7681", "-W", "claude"]

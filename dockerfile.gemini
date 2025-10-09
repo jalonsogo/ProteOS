@@ -23,7 +23,7 @@ RUN echo '#!/bin/bash' > /start.sh && \
     echo 'fi' >> /start.sh && \
     echo '' >> /start.sh && \
     echo 'echo "Starting Gemini CLI..."' >> /start.sh && \
-    echo 'exec gemini chat' >> /start.sh && \
+    echo 'exec gemini' >> /start.sh && \
     chmod +x /start.sh
 
 # Set proper environment for interactive terminal

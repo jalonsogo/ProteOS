@@ -1,5 +1,5 @@
-// WhaleOS Desktop Application
-class WhaleOS {
+// ProteOS Desktop Application
+class ProteOS {
     constructor() {
         this.containers = new Map();
         this.windows = new Map();
@@ -212,6 +212,9 @@ class WhaleOS {
                     <span>${containerData.name}</span>
                 </div>
                 <div class="window-controls">
+                    <button class="window-control local-terminal" data-action="local-terminal" title="Open in local iTerm">
+                        <i data-lucide="square-terminal" style="width: 14px; height: 14px;"></i>
+                    </button>
                     <button class="window-control minimize" data-action="minimize">−</button>
                     <button class="window-control maximize" data-action="maximize">□</button>
                     <button class="window-control close" data-action="close">×</button>
@@ -255,6 +258,9 @@ class WhaleOS {
             this.bringToFront(windowEl);
         });
 
+        // Initialize Lucide icons for the new window
+        setTimeout(() => lucide.createIcons(), 10);
+
         // Update sessions widget
         this.updateSessionsWidget();
     }
@@ -268,6 +274,9 @@ class WhaleOS {
                 const action = control.dataset.action;
 
                 switch(action) {
+                    case 'local-terminal':
+                        this.openLocalTerminal(windowId);
+                        break;
                     case 'minimize':
                         this.minimizeWindow(windowEl, windowId);
                         break;
@@ -1433,12 +1442,52 @@ class WhaleOS {
             this.showNotification('API keys saved locally, but failed to sync to server', true);
         });
     }
+
+    async openLocalTerminal(containerId) {
+        try {
+            const containerData = this.containers.get(containerId);
+            if (!containerData) {
+                throw new Error('Container not found');
+            }
+
+            this.addLog('info', `Opening local iTerm for ${containerData.name}...`);
+            this.showNotification('Opening local iTerm terminal...');
+
+            const response = await fetch('/api/terminal/local', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    containerId: containerId,
+                    workspacePath: containerData.workspaceDir
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to open local terminal');
+            }
+
+            const data = await response.json();
+            this.addLog('success', `Local iTerm opened for ${containerData.name}`);
+            this.showNotification('Local iTerm terminal opened');
+        } catch (error) {
+            console.error('Error opening local terminal:', error);
+            this.addLog('error', `Failed to open local terminal: ${error.message}`);
+            this.showNotification('Failed to open local terminal', true);
+        }
+    }
 }
 
-// Initialize WhaleOS when DOM is ready
+// Initialize ProteOS when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    window.whaleOS = new WhaleOS();
+    window.proteOS = new ProteOS();
     console.log('[PROTEOS] Desktop initialized');
-    window.whaleOS.addLog('info', 'ProteOS System initialized - Shape-shifting AI platform ready');
-    window.whaleOS.addLog('info', `Server URL: ${window.location.origin}`);
+    window.proteOS.addLog('info', 'ProteOS System initialized - Shape-shifting AI platform ready');
+    window.proteOS.addLog('info', `Server URL: ${window.location.origin}`);
+
+    // Update URL display in taskbar with actual server URL
+    const urlDisplay = document.getElementById('url-display');
+    if (urlDisplay) {
+        urlDisplay.textContent = window.location.origin;
+    }
 });

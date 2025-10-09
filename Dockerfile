@@ -9,6 +9,7 @@ WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
+COPY dockerfile.* ./
 
 # Install dependencies
 RUN npm install
@@ -22,7 +23,7 @@ COPY .env* ./
 RUN mkdir -p /workspace
 
 # Expose port
-EXPOSE 3000
+EXPOSE 3001
 
 # Start the application
 CMD ["node", "server/index.js"]
