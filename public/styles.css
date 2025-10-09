@@ -15,7 +15,12 @@ body {
 .desktop {
     width: 100vw;
     height: 100vh;
-    background: linear-gradient(180deg, #1a4d5e 0%, #0a1929 50%, #050d16 100%);
+    background:
+        linear-gradient(180deg, rgba(26, 77, 94, 0.8) 0%, rgba(10, 25, 41, 0.9) 50%, rgba(5, 13, 22, 0.95) 100%),
+        url('background.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     position: relative;
     overflow: hidden;
 }
@@ -89,6 +94,16 @@ body {
     font-size: 48px;
     margin-bottom: 8px;
     filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-image svg {
+    width: 48px;
+    height: 48px;
+    stroke: white;
+    stroke-width: 1.5;
 }
 
 .icon-label {
@@ -149,12 +164,18 @@ body {
 }
 
 .whale-logo {
-    font-size: 20px;
-    width: 25.5px;
+    width: 20px;
     height: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.whale-logo svg {
+    width: 20px;
+    height: 20px;
+    stroke: white;
+    stroke-width: 2;
 }
 
 /* Menu items */
@@ -185,6 +206,16 @@ body {
     width: 12px;
     height: 12px;
     opacity: 0.9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.menu-item-icon svg {
+    width: 12px;
+    height: 12px;
+    stroke: white;
+    stroke-width: 2;
 }
 
 .taskbar-apps {
@@ -258,6 +289,16 @@ body {
     width: 16px;
     height: 16px;
     opacity: 0.9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tray-item.url-badge .icon svg {
+    width: 16px;
+    height: 16px;
+    stroke: white;
+    stroke-width: 2;
 }
 
 .tray-item {

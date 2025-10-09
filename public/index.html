@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ProteOS - Shape-shifting AI Platform</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
     <!-- Desktop Background -->
@@ -12,23 +13,23 @@
         <!-- Desktop Icons -->
         <div class="desktop-icons">
             <div class="desktop-icon" id="claude-icon" title="Launch Claude Code Terminal" data-container-type="claude">
-                <div class="icon-image">🐋</div>
+                <div class="icon-image"><i data-lucide="bot"></i></div>
                 <div class="icon-label">Claude Code</div>
             </div>
             <div class="desktop-icon" id="gemini-icon" title="Launch Gemini CLI Terminal" data-container-type="gemini">
-                <div class="icon-image">🔷</div>
+                <div class="icon-image"><i data-lucide="sparkles"></i></div>
                 <div class="icon-label">Gemini CLI</div>
             </div>
             <div class="desktop-icon" id="openai-icon" title="Launch OpenAI Codex CLI Terminal" data-container-type="openai">
-                <div class="icon-image">⚡</div>
+                <div class="icon-image"><i data-lucide="zap"></i></div>
                 <div class="icon-label">OpenAI Codex</div>
             </div>
             <div class="desktop-icon" id="files-icon" title="Browse Container Files">
-                <div class="icon-image">📁</div>
+                <div class="icon-image"><i data-lucide="folder"></i></div>
                 <div class="icon-label">Files</div>
             </div>
             <div class="desktop-icon" id="about-icon" title="About ProteOS">
-                <div class="icon-image">ℹ️</div>
+                <div class="icon-image"><i data-lucide="info"></i></div>
                 <div class="icon-label">About</div>
             </div>
         </div>
@@ -37,24 +38,24 @@
         <div class="taskbar">
             <div class="taskbar-left">
                 <div class="start-button">
-                    <span class="whale-logo">🌊</span>
+                    <i data-lucide="waves" class="whale-logo"></i>
                     <span>ProteOS</span>
                 </div>
                 <div class="menu-items">
                     <div class="menu-item" id="settings-menu">
-                        <span class="menu-item-icon">⚙️</span>
+                        <i data-lucide="settings" class="menu-item-icon"></i>
                         <span>Settings</span>
                     </div>
                     <div class="menu-item" id="folders-menu">
-                        <span class="menu-item-icon">📁</span>
+                        <i data-lucide="folder-open" class="menu-item-icon"></i>
                         <span>Folders</span>
                     </div>
                     <div class="menu-item" id="help-menu">
-                        <span class="menu-item-icon">🛟</span>
+                        <i data-lucide="life-buoy" class="menu-item-icon"></i>
                         <span>Help</span>
                     </div>
                     <div class="menu-item" id="bugs-menu">
-                        <span class="menu-item-icon">🐛</span>
+                        <i data-lucide="bug" class="menu-item-icon"></i>
                         <span>Submit Bugs</span>
                     </div>
                 </div>
@@ -62,7 +63,7 @@
             <div class="taskbar-right">
                 <div class="system-tray">
                     <span class="tray-item url-badge">
-                        <span class="icon">🌐</span>
+                        <i data-lucide="globe" class="icon"></i>
                         <span id="url-display">http://localhost:3001</span>
                     </span>
                     <span class="tray-item" id="clock">Tue Aug 31 11:40</span>
@@ -139,5 +140,9 @@
     </div>
 
     <script src="app.js"></script>
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
 </body>
 </html>
