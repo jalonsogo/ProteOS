@@ -107,19 +107,22 @@ class WhaleOS {
             const containerTypes = {
                 claude: {
                     name: 'Claude Terminal',
-                    emoji: '🐋',
+                    icon: '<img src="images/icons/apps/Claude.svg" alt="Claude" class="window-icon" onerror="this.src=\'images/icons/apps/Claude.png\'">',
+                    emoji: '🐋',  // Fallback
                     loading: 'Launching Claude Code container...',
                     ready: 'Claude Code ready!'
                 },
                 gemini: {
                     name: 'Gemini Terminal',
-                    emoji: '🔷',
+                    icon: '<img src="images/icons/apps/Gemini.svg" alt="Gemini" class="window-icon" onerror="this.src=\'images/icons/apps/Gemini.png\'">',
+                    emoji: '🔷',  // Fallback
                     loading: 'Launching Gemini CLI container...',
                     ready: 'Gemini CLI ready!'
                 },
                 openai: {
                     name: 'OpenAI Codex Terminal',
-                    emoji: '⚡',
+                    icon: '<img src="images/icons/apps/OpenAI.svg" alt="OpenAI" class="window-icon" onerror="this.src=\'images/icons/apps/OpenAI.png\'">',
+                    emoji: '⚡',  // Fallback
                     loading: 'Launching OpenAI Codex container...',
                     ready: 'OpenAI Codex ready!'
                 }
@@ -152,7 +155,7 @@ class WhaleOS {
 
             // Wait a bit for container to be ready
             setTimeout(() => {
-                this.createWindow(data, config.emoji);
+                this.createWindow(data, config.icon || config.emoji, type);
                 this.showNotification(config.ready);
                 this.addLog('success', config.ready);
             }, 3000);
@@ -165,13 +168,14 @@ class WhaleOS {
         }
     }
 
-    createWindow(containerData, emoji = '🐋') {
+    createWindow(containerData, icon = '🐋', type = 'claude') {
         const windowId = containerData.id;
 
         // Create window element
         const windowEl = document.createElement('div');
         windowEl.className = 'window';
         windowEl.id = `window-${windowId}`;
+        windowEl.dataset.containerType = type;
         windowEl.style.width = '900px';
         windowEl.style.height = '600px';
         windowEl.style.left = `${100 + this.windows.size * 30}px`;
@@ -181,7 +185,7 @@ class WhaleOS {
         windowEl.innerHTML = `
             <div class="window-header">
                 <div class="window-title">
-                    <span>${emoji}</span>
+                    <span class="window-icon-wrapper">${icon}</span>
                     <span>${containerData.name}</span>
                 </div>
                 <div class="window-controls">
@@ -221,12 +225,15 @@ class WhaleOS {
             }, 1000);
         };
 
-        this.windows.set(windowId, { element: windowEl, data: containerData });
+        this.windows.set(windowId, { element: windowEl, data: containerData, type: type });
 
         // Bring to front on click
         windowEl.addEventListener('mousedown', () => {
             this.bringToFront(windowEl);
         });
+
+        // Update sessions widget
+        this.updateSessionsWidget();
     }
 
     setupWindowControls(windowEl, windowId) {
@@ -316,9 +323,105 @@ class WhaleOS {
 
     minimizeWindow(windowEl, windowId) {
         windowEl.classList.add('minimized');
-        // Taskbar button functionality disabled in new design
-        // const taskbarBtn = document.querySelector(`[data-window-id="${windowId}"]`);
-        // if (taskbarBtn) taskbarBtn.classList.remove('active');
+
+        // Get window data
+        const windowData = this.windows.get(windowId);
+        if (!windowData) return;
+
+        // Create minimized session button
+        this.addMinimizedSession(windowEl, windowId, windowData);
+
+        // Show the minimized bar
+        this.updateMinimizedBar();
+
+        // Update sessions widget
+        this.updateSessionsWidget();
+    }
+
+    addMinimizedSession(windowEl, windowId, windowData) {
+        const minimizedBar = document.getElementById('minimized-bar');
+
+        console.log('addMinimizedSession called', { windowId, minimizedBar });
+
+        // Check if already exists
+        if (document.getElementById(`minimized-${windowId}`)) {
+            console.log('Minimized session already exists');
+            return;
+        }
+
+        // Get icon/emoji from window
+        const windowTitle = windowEl.querySelector('.window-title');
+        const iconWrapper = windowTitle?.querySelector('.window-icon-wrapper');
+        const titleElement = windowTitle?.querySelector('span:last-child');
+
+        // Check if icon is an img element or text/emoji
+        let icon = '🐋';
+        if (iconWrapper) {
+            const imgElement = iconWrapper.querySelector('img.window-icon');
+            if (imgElement) {
+                icon = imgElement.outerHTML;
+            } else {
+                icon = iconWrapper.innerHTML || '🐋';
+            }
+        }
+
+        const title = titleElement?.textContent || windowData.data?.name || 'Window';
+
+        // Create minimized session element
+        const sessionEl = document.createElement('div');
+        sessionEl.className = 'minimized-session';
+        sessionEl.id = `minimized-${windowId}`;
+        sessionEl.innerHTML = `
+            <span class="session-icon">${icon}</span>
+            <span class="session-title">${title}</span>
+            <span class="session-close">×</span>
+        `;
+
+        // Click to restore
+        sessionEl.addEventListener('click', (e) => {
+            if (!e.target.classList.contains('session-close')) {
+                this.restoreWindow(windowEl, windowId);
+            }
+        });
+
+        // Close button
+        sessionEl.querySelector('.session-close').addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.closeWindow(windowEl, windowId);
+        });
+
+        minimizedBar.appendChild(sessionEl);
+    }
+
+    restoreWindow(windowEl, windowId) {
+        windowEl.classList.remove('minimized');
+        this.bringToFront(windowEl);
+
+        // Remove from minimized bar
+        const minimizedSession = document.getElementById(`minimized-${windowId}`);
+        if (minimizedSession) {
+            minimizedSession.remove();
+        }
+
+        this.updateMinimizedBar();
+
+        // Update sessions widget
+        this.updateSessionsWidget();
+    }
+
+    updateMinimizedBar() {
+        const minimizedBar = document.getElementById('minimized-bar');
+        const hasMinimized = minimizedBar.querySelectorAll('.minimized-session').length > 0;
+
+        console.log('updateMinimizedBar called', { hasMinimized, count: minimizedBar.querySelectorAll('.minimized-session').length });
+
+        if (hasMinimized) {
+            minimizedBar.classList.add('has-minimized');
+            console.log('Minimized bar should now be visible');
+        } else {
+            minimizedBar.classList.remove('has-minimized');
+            console.log('Minimized bar should now be hidden');
+        }
     }
 
     maximizeWindow(windowEl) {
@@ -354,9 +457,12 @@ class WhaleOS {
                 windowEl.remove();
                 this.windows.delete(windowId);
 
-                // Taskbar button functionality disabled in new design
-                // const taskbarBtn = document.querySelector(`[data-window-id="${windowId}"]`);
-                // if (taskbarBtn) taskbarBtn.remove();
+                // Remove from minimized bar if present
+                const minimizedSession = document.getElementById(`minimized-${windowId}`);
+                if (minimizedSession) {
+                    minimizedSession.remove();
+                    this.updateMinimizedBar();
+                }
 
                 // Stop container
                 const response = await fetch(`/api/containers/${windowId}`, {
@@ -369,6 +475,7 @@ class WhaleOS {
 
                 this.containers.delete(windowId);
                 this.updateContainerCount();
+                this.updateSessionsWidget();
                 this.addLog('success', `Container stopped: ${containerName}`);
                 this.showNotification('Container stopped');
             } catch (error) {
@@ -404,6 +511,9 @@ class WhaleOS {
 
     bringToFront(windowEl) {
         windowEl.style.zIndex = this.zIndexCounter++;
+
+        // Update sessions widget to reflect active window
+        this.updateSessionsWidget();
 
         // Taskbar button functionality disabled in new design
         // document.querySelectorAll('.taskbar-app').forEach(btn => {
@@ -793,6 +903,9 @@ class WhaleOS {
         // Re-initialize Lucide icons
         setTimeout(() => lucide.createIcons(), 100);
 
+        // Update sessions widget
+        this.updateSessionsWidget();
+
         this.addLog('info', 'System log viewer opened');
     }
 
@@ -843,6 +956,17 @@ class WhaleOS {
     closeLogWindow(windowEl, windowId) {
         windowEl.remove();
         this.windows.delete(windowId);
+
+        // Remove from minimized bar if present
+        const minimizedSession = document.getElementById(`minimized-${windowId}`);
+        if (minimizedSession) {
+            minimizedSession.remove();
+            this.updateMinimizedBar();
+        }
+
+        // Update sessions widget
+        this.updateSessionsWidget();
+
         this.addLog('info', 'System log viewer closed');
     }
 
@@ -906,6 +1030,105 @@ class WhaleOS {
                 }
             }
         });
+    }
+
+    updateSessionsWidget() {
+        const sessionsList = document.getElementById('sessions-list');
+        const sessionsCount = document.getElementById('sessions-count');
+
+        // Clear current list
+        sessionsList.innerHTML = '';
+
+        // Get all windows
+        const windows = Array.from(this.windows.entries());
+
+        if (windows.length === 0) {
+            sessionsList.innerHTML = '<div class="sessions-empty">No active sessions</div>';
+            sessionsCount.textContent = '0';
+            return;
+        }
+
+        sessionsCount.textContent = windows.length;
+
+        // Create session items
+        windows.forEach(([windowId, windowData]) => {
+            const windowEl = windowData.element;
+            const isMinimized = windowEl.classList.contains('minimized');
+            const isActive = parseInt(windowEl.style.zIndex) === this.zIndexCounter - 1;
+
+            // Get icon/emoji from window
+            const windowTitle = windowEl.querySelector('.window-title');
+            const iconWrapper = windowTitle?.querySelector('.window-icon-wrapper');
+            const titleElement = windowTitle?.querySelector('span:last-child');
+
+            // Check if icon is an img element or text/emoji
+            let icon = '🐋';
+            if (iconWrapper) {
+                const imgElement = iconWrapper.querySelector('img.window-icon');
+                if (imgElement) {
+                    icon = imgElement.outerHTML;
+                } else {
+                    icon = iconWrapper.innerHTML || '🐋';
+                }
+            }
+
+            const title = titleElement?.textContent || windowData.data?.name || 'Window';
+
+            const sessionItem = document.createElement('div');
+            sessionItem.className = 'session-item';
+            if (isActive && !isMinimized) sessionItem.classList.add('active');
+            if (isMinimized) sessionItem.classList.add('minimized');
+
+            sessionItem.innerHTML = `
+                <div class="session-item-icon">${icon}</div>
+                <div class="session-item-info">
+                    <div class="session-item-name">${title}</div>
+                    <div class="session-item-status">
+                        <span class="session-status-dot"></span>
+                        <span>${isMinimized ? 'Minimized' : 'Active'}</span>
+                    </div>
+                </div>
+                <div class="session-item-actions">
+                    <button class="session-action-btn minimize" title="${isMinimized ? 'Restore' : 'Minimize'}">${isMinimized ? '□' : '−'}</button>
+                    <button class="session-action-btn close" title="Close">×</button>
+                </div>
+            `;
+
+            // Click on item to focus/restore window
+            sessionItem.addEventListener('click', (e) => {
+                if (!e.target.classList.contains('session-action-btn')) {
+                    if (isMinimized) {
+                        this.restoreWindow(windowEl, windowId);
+                    } else {
+                        this.bringToFront(windowEl);
+                    }
+                    this.updateSessionsWidget();
+                }
+            });
+
+            // Minimize/restore button
+            const minimizeBtn = sessionItem.querySelector('.minimize');
+            minimizeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (isMinimized) {
+                    this.restoreWindow(windowEl, windowId);
+                } else {
+                    this.minimizeWindow(windowEl, windowId);
+                }
+            });
+
+            // Close button
+            const closeBtn = sessionItem.querySelector('.close');
+            closeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.closeWindow(windowEl, windowId);
+            });
+
+            sessionsList.appendChild(sessionItem);
+        });
+
+        // Re-initialize Lucide icons
+        setTimeout(() => lucide.createIcons(), 10);
     }
 }
 

@@ -1,37 +1,41 @@
-# ProteOS - Containerized Distribution
-# This container runs the ProteOS server and manages Docker containers via Docker socket
-FROM node:20-alpine
+# Claude Code CLI Container
+FROM ubuntu:22.04
 
-# Install Docker CLI (not Docker daemon - we'll use host's Docker via socket)
-RUN apk add --no-cache docker-cli git
+# Prevent interactive prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
 
-# Set working directory
-WORKDIR /app
+# Install required dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    wget \
+    git \
+    build-essential \
+    python3 \
+    python3-pip \
+    sudo \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy package files
-COPY package*.json ./
+# Install Node.js 20
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install dependencies
-RUN npm ci --production
+# Install ttyd for web terminal access
+RUN wget -qO /usr/local/bin/ttyd https://github.com/tsl0922/ttyd/releases/download/1.7.7/ttyd.x86_64 \
+    && chmod +x /usr/local/bin/ttyd
 
-# Copy application files
-COPY server/ ./server/
-COPY public/ ./public/
-COPY dockerfile* ./
+# Install Claude Code CLI
+RUN npm install -g @anthropic-ai/claude-code-cli
 
-# Create workspace directory
-RUN mkdir -p /workspace/containers
+# Create working directory
+WORKDIR /workspace
 
-# Expose port
-EXPOSE 3000
+# Expose ttyd port
+EXPOSE 7681
 
-# Set environment variables
-ENV NODE_ENV=production
-ENV PORT=3000
+# Set environment variable for API key (will be passed at runtime)
+ENV ANTHROPIC_API_KEY=""
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3000', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
-
-# Start the application
-CMD ["node", "server/index.js"]
+# Start ttyd with Claude Code CLI
+CMD ["ttyd", "-p", "7681", "-W", "bash", "-c", "export PS1='claude-code> ' && exec bash"]
