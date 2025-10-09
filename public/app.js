@@ -89,28 +89,6 @@ class WhaleOS {
         document.getElementById('file-viewer-modal').addEventListener('click', (e) => {
             if (e.target.id === 'file-viewer-modal') this.hideFileViewer();
         });
-        document.getElementById('logs-modal').addEventListener('click', (e) => {
-            if (e.target.id === 'logs-modal') this.hideLogViewer();
-        });
-
-        // Log viewer controls
-        document.getElementById('clear-logs-btn')?.addEventListener('click', () => {
-            this.clearLogs();
-        });
-
-        document.getElementById('auto-scroll-btn')?.addEventListener('click', (e) => {
-            this.autoScroll = !this.autoScroll;
-            e.currentTarget.dataset.active = this.autoScroll;
-        });
-
-        document.querySelectorAll('.log-filter-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                document.querySelectorAll('.log-filter-btn').forEach(b => b.classList.remove('active'));
-                e.target.classList.add('active');
-                this.currentLogFilter = e.target.dataset.level;
-                this.filterLogs();
-            });
-        });
 
         // File browser controls
         document.getElementById('file-browser-container-select').addEventListener('change', (e) => {
@@ -692,7 +670,13 @@ class WhaleOS {
     }
 
     appendLogToUI(logEntry) {
-        const logViewer = document.getElementById('log-viewer');
+        // Check if log viewer window is open
+        const logWindow = document.getElementById('window-system-logs');
+        if (!logWindow) return;
+
+        const logViewer = logWindow.querySelector('#window-log-viewer');
+        if (!logViewer) return;
+
         const logElement = document.createElement('div');
         logElement.className = `log-entry log-${logEntry.level}`;
         logElement.dataset.level = logEntry.level;
@@ -717,25 +701,182 @@ class WhaleOS {
     }
 
     showLogViewer() {
-        const modal = document.getElementById('logs-modal');
-        modal.classList.add('active');
+        // Check if log viewer window already exists
+        if (this.windows.has('system-logs')) {
+            const existingWindow = document.getElementById('window-system-logs');
+            if (existingWindow) {
+                this.bringToFront(existingWindow);
+                return;
+            }
+        }
+
+        // Create log viewer window
+        const windowId = 'system-logs';
+        const windowEl = document.createElement('div');
+        windowEl.className = 'window';
+        windowEl.id = `window-${windowId}`;
+        windowEl.style.width = '900px';
+        windowEl.style.height = '600px';
+        windowEl.style.left = '100px';
+        windowEl.style.top = '80px';
+        windowEl.style.zIndex = this.zIndexCounter++;
+
+        windowEl.innerHTML = `
+            <div class="window-header">
+                <div class="window-title">
+                    <i data-lucide="terminal" style="width: 16px; height: 16px;"></i>
+                    <span>ProteOS System Logs</span>
+                </div>
+                <div class="window-controls">
+                    <button class="window-control minimize" data-action="minimize">−</button>
+                    <button class="window-control maximize" data-action="maximize">□</button>
+                    <button class="window-control close" data-action="close-logs">×</button>
+                </div>
+            </div>
+            <div class="window-content log-window-content">
+                <div class="log-window-toolbar">
+                    <div class="log-filters">
+                        <button class="log-filter-btn active" data-level="all">All</button>
+                        <button class="log-filter-btn" data-level="info">Info</button>
+                        <button class="log-filter-btn" data-level="success">Success</button>
+                        <button class="log-filter-btn" data-level="warning">Warning</button>
+                        <button class="log-filter-btn" data-level="error">Error</button>
+                    </div>
+                    <div class="log-controls">
+                        <button class="log-control-btn" id="window-clear-logs-btn" title="Clear logs">
+                            <i data-lucide="trash-2"></i>
+                        </button>
+                        <button class="log-control-btn" id="window-auto-scroll-btn" title="Auto-scroll" data-active="true">
+                            <i data-lucide="arrow-down"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="log-viewer" id="window-log-viewer"></div>
+            </div>
+            <div class="resize-handle"></div>
+        `;
+
+        document.getElementById('windows-container').appendChild(windowEl);
+
+        // Setup window controls
+        this.setupLogWindowControls(windowEl, windowId);
+        this.setupWindowDragging(windowEl);
+        this.setupWindowResize(windowEl);
 
         // Populate with existing logs
-        const logViewer = document.getElementById('log-viewer');
-        logViewer.innerHTML = '';
-        this.logs.forEach(log => this.appendLogToUI(log));
+        const logViewer = windowEl.querySelector('#window-log-viewer');
+        this.logs.forEach(log => {
+            const logElement = document.createElement('div');
+            logElement.className = `log-entry log-${log.level}`;
+            logElement.dataset.level = log.level;
+            logElement.innerHTML = `
+                <span class="log-time">${log.time}</span>
+                <span class="log-level">${log.level}</span>
+                <span class="log-message">${log.message}</span>
+            `;
+            logViewer.appendChild(logElement);
+        });
 
         // Scroll to bottom
         if (this.autoScroll) {
             logViewer.scrollTop = logViewer.scrollHeight;
         }
 
-        // Re-initialize Lucide icons in the modal
+        // Store window reference
+        this.windows.set(windowId, { element: windowEl, type: 'logs' });
+
+        // Bring to front on click
+        windowEl.addEventListener('mousedown', () => {
+            this.bringToFront(windowEl);
+        });
+
+        // Re-initialize Lucide icons
         setTimeout(() => lucide.createIcons(), 100);
+
+        this.addLog('info', 'System log viewer opened');
     }
 
-    hideLogViewer() {
-        document.getElementById('logs-modal').classList.remove('active');
+    setupLogWindowControls(windowEl, windowId) {
+        const controls = windowEl.querySelectorAll('.window-control');
+
+        controls.forEach(control => {
+            control.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const action = control.dataset.action;
+
+                switch(action) {
+                    case 'minimize':
+                        this.minimizeWindow(windowEl, windowId);
+                        break;
+                    case 'maximize':
+                        this.maximizeWindow(windowEl);
+                        break;
+                    case 'close-logs':
+                        this.closeLogWindow(windowEl, windowId);
+                        break;
+                }
+            });
+        });
+
+        // Filter buttons
+        windowEl.querySelectorAll('.log-filter-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                windowEl.querySelectorAll('.log-filter-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                this.currentLogFilter = e.target.dataset.level;
+                this.filterLogsInWindow(windowEl);
+            });
+        });
+
+        // Clear logs button
+        windowEl.querySelector('#window-clear-logs-btn')?.addEventListener('click', () => {
+            this.clearLogsInWindow(windowEl);
+        });
+
+        // Auto-scroll button
+        windowEl.querySelector('#window-auto-scroll-btn')?.addEventListener('click', (e) => {
+            this.autoScroll = !this.autoScroll;
+            e.currentTarget.dataset.active = this.autoScroll;
+        });
+    }
+
+    closeLogWindow(windowEl, windowId) {
+        windowEl.remove();
+        this.windows.delete(windowId);
+        this.addLog('info', 'System log viewer closed');
+    }
+
+    filterLogsInWindow(windowEl) {
+        const logEntries = windowEl.querySelectorAll('.log-entry');
+        logEntries.forEach(entry => {
+            if (this.currentLogFilter === 'all') {
+                entry.classList.remove('hidden');
+            } else {
+                if (entry.dataset.level === this.currentLogFilter) {
+                    entry.classList.remove('hidden');
+                } else {
+                    entry.classList.add('hidden');
+                }
+            }
+        });
+    }
+
+    clearLogsInWindow(windowEl) {
+        if (confirm('Clear all system logs?')) {
+            this.logs = [];
+            const logViewer = windowEl.querySelector('#window-log-viewer');
+            logViewer.innerHTML = '';
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+            logViewer.innerHTML = `
+                <div class="log-entry log-info">
+                    <span class="log-time">${timeString}</span>
+                    <span class="log-level">INFO</span>
+                    <span class="log-message">Logs cleared</span>
+                </div>
+            `;
+            this.addLog('info', 'System logs cleared');
+        }
     }
 
     clearLogs() {
