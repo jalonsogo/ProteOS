@@ -29,7 +29,7 @@ app.use(express.static(join(__dirname, '../public')));
 const imageConfigs = {
   claude: {
     name: 'whaleos-claude',
-    dockerfile: 'dockerfile',
+    dockerfile: 'dockerfile.claude',
     env: 'ANTHROPIC_API_KEY'
   },
   gemini: {

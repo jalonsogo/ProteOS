@@ -6,6 +6,12 @@
 
 ![ProteOS](https://img.shields.io/badge/status-production-green) ![Docker](https://img.shields.io/badge/docker-required-blue) ![Node](https://img.shields.io/badge/node-20+-green) ![AI](https://img.shields.io/badge/AI-3%20providers-purple)
 
+![Desktop Overview](images/desktop-overview.png)
+*ProteOS ocean-themed desktop with multiple AI providers*
+
+![Gemini Terminal](images/gemini-terminal.png)
+*Gemini CLI running in a dedicated terminal window*
+
 ## 🎭 The Mythology
 
 **Proteus (Πρωτεύς)** was an ancient Greek sea deity known for:
@@ -65,7 +71,7 @@ ProteOS/
 │   ├── styles.css        # Ocean-themed styling with glassmorphism
 │   ├── app.js            # Window manager + logging system + API client
 │   └── background.png    # Ocean background image (19MB)
-├── dockerfile            # Claude Code image
+├── dockerfile.claude     # Claude Code image
 ├── dockerfile.gemini     # Gemini CLI image
 ├── dockerfile.openai     # OpenAI Codex image
 ├── Dockerfile            # Main P/OS container
