@@ -86,11 +86,42 @@ cd ProteOS
 cp .env.example .env
 nano .env  # Add your API keys
 
-# 3. Start ProteOS
-docker-compose up -d
+# 3. Build and start ProteOS
+docker compose up --build
 
 # 4. Open your browser
-open http://localhost:3000
+open http://localhost:3001
+```
+
+**Note**: ProteOS runs on port **3001** by default to avoid conflicts with other services.
+
+### ⚠️ Important: Docker Build Prerequisites
+
+Before building, ensure:
+
+1. **Remove package-lock.json from .dockerignore**: The file must be included in the build context for `npm ci` to work
+2. **Package name consistency**: Verify `package.json` and `package-lock.json` have matching names
+3. **Docker socket access**: ProteOS requires access to `/var/run/docker.sock` to manage child containers
+
+### Common Build Issues
+
+**Problem**: `npm ci` fails with "cannot find package-lock.json"
+```bash
+# Solution: Ensure package-lock.json is NOT in .dockerignore
+grep -v "package-lock.json" .dockerignore > .dockerignore.tmp
+mv .dockerignore.tmp .dockerignore
+```
+
+**Problem**: Port 3000 already in use
+```bash
+# Solution: ProteOS now uses port 3001 by default
+# Access at http://localhost:3001
+```
+
+**Problem**: Container mount errors ("path is not shared from host")
+```bash
+# Solution: The docker-compose.yml now passes HOST_WORKSPACE_PATH
+# This is automatically handled - no action needed
 ```
 
 ### Using Native Node.js

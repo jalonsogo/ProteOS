@@ -1,11 +1,9 @@
-version: '3.8'
-
 services:
   proteos:
     build: .
     container_name: proteos
     ports:
-      - "3000:3000"
+      - "3001:3000"
     volumes:
       # Mount Docker socket to manage containers (Docker-in-Docker approach)
       - /var/run/docker.sock:/var/run/docker.sock
@@ -16,6 +14,7 @@ services:
       - GEMINI_API_KEY=${GEMINI_API_KEY}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - PORT=3000
+      - HOST_WORKSPACE_PATH=${PWD}/workspace
     restart: unless-stopped
     networks:
       - proteos-network

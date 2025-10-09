@@ -101,6 +101,12 @@ app.post('/api/containers/create', async (req, res) => {
       return res.status(500).json({ error: `${config.env} not set in environment` });
     }
 
+    // Use host workspace path for Docker bind mounts (when running in container)
+    // Otherwise use the local workspace path (when running directly on host)
+    const hostWorkspacePath = process.env.HOST_WORKSPACE_PATH
+      ? join(process.env.HOST_WORKSPACE_PATH, 'containers', containerId)
+      : workspaceDir;
+
     const container = await docker.createContainer({
       Image: config.name,
       name: containerId,
@@ -110,7 +116,7 @@ app.post('/api/containers/create', async (req, res) => {
           '7681/tcp': [{ HostPort: port.toString() }]
         },
         Binds: [
-          `${workspaceDir}:/workspace`
+          `${hostWorkspacePath}:/workspace`
         ],
         AutoRemove: true
       }
