@@ -12,27 +12,7 @@
 ![Gemini Terminal](images/gemini-terminal.png)
 *Gemini CLI running in a dedicated terminal window*
 
-## 🎭 The Mythology
-
-**Proteus (Πρωτεύς)** was an ancient Greek sea deity known for:
-- **Shape-shifting** — Symbolizing P/OS's ability to seamlessly switch between AI providers
-- **Wisdom & Prophecy** — Representing the intelligence and insight of AI assistants
-- **The Sea** — Perfectly connecting with Docker's whale and oceanic lineage
-- **Adaptation** — Just as Proteus changed forms, P/OS adapts to your workflow
-
 ## ✨ Features
-
-### 🌊 Ocean-Themed UI Design
-- **Deep Ocean Aesthetic**: Immersive underwater gradient background with particle effects
-- **Professional Icons**: Clean Lucide SVG icons throughout the interface
-- **Glassmorphism Effects**: Modern backdrop blur and translucent elements
-- **Dynamic Background**: Custom PNG background support with gradient overlay
-
-### 🖥️ Desktop OS Experience
-- **Familiar Interface**: Icons, windows, top navigation bar just like a real OS
-- **Multi-Window Management**: Drag, resize, minimize, maximize multiple containers
-- **Persistent Sessions**: Your work survives container restarts
-- **Unlimited Instances**: Spawn multiple instances of the same AI provider concurrently
 
 ### 🎭 Multi-AI Provider Support
 - **🐋 Claude Code** (Anthropic Claude 3.5 Sonnet)
@@ -60,24 +40,6 @@
 - **Remote Access**: Run on server, access from anywhere
 - **Cross-Platform**: Works on Mac, Linux, Windows
 
-## 🏗️ Architecture
-
-```
-ProteOS/
-├── server/
-│   └── index.js          # Express server + Docker orchestration
-├── public/
-│   ├── index.html        # Desktop UI with Lucide icons
-│   ├── styles.css        # Ocean-themed styling with glassmorphism
-│   ├── app.js            # Window manager + logging system + API client
-│   └── background.png    # Ocean background image (19MB)
-├── dockerfile.claude     # Claude Code image
-├── dockerfile.gemini     # Gemini CLI image
-├── dockerfile.openai     # OpenAI Codex image
-├── Dockerfile            # Main P/OS container
-├── docker-compose.yml    # One-command deployment
-└── package.json          # Dependencies
-```
 
 ## 🚀 Quick Start
 
@@ -101,51 +63,6 @@ open http://localhost:3001
 
 **Note**: ProteOS runs on port **3001** by default to avoid conflicts with other services.
 
-### ⚠️ Important: Docker Build Prerequisites
-
-Before building, ensure:
-
-1. **Remove package-lock.json from .dockerignore**: The file must be included in the build context for `npm ci` to work
-2. **Package name consistency**: Verify `package.json` and `package-lock.json` have matching names
-3. **Docker socket access**: ProteOS requires access to `/var/run/docker.sock` to manage child containers
-
-### Common Build Issues
-
-**Problem**: `npm ci` fails with "cannot find package-lock.json"
-```bash
-# Solution: Ensure package-lock.json is NOT in .dockerignore
-grep -v "package-lock.json" .dockerignore > .dockerignore.tmp
-mv .dockerignore.tmp .dockerignore
-```
-
-**Problem**: Port 3000 already in use
-```bash
-# Solution: ProteOS now uses port 3001 by default
-# Access at http://localhost:3001
-```
-
-**Problem**: Container mount errors ("path is not shared from host")
-```bash
-# Solution: The docker-compose.yml now passes HOST_WORKSPACE_PATH
-# This is automatically handled - no action needed
-```
-
-### Using Native Node.js
-
-```bash
-# 1. Install dependencies
-npm install
-
-# 2. Configure API keys
-cp .env.example .env
-nano .env
-
-# 3. Start server
-npm start
-
-# 4. Access at http://localhost:3000
-```
-
 ## 🔑 API Keys
 
 ProteOS supports three AI providers. Configure the ones you want to use:
@@ -167,181 +84,10 @@ OPENAI_API_KEY=your-openai-key
 PORT=3000
 ```
 
-## 🎮 Usage
 
-### Launching AI Terminals
+## 📜 LOLcense
 
-1. Click any AI provider icon on the desktop:
-   - **Claude Code** (bot icon) — Anthropic's Claude
-   - **Gemini CLI** (sparkles icon) — Google's Gemini
-   - **OpenAI Codex** (zap icon) — OpenAI's GPT
-
-2. Wait 3-5 seconds for container startup
-
-3. Start coding with AI assistance!
-
-4. Launch multiple instances of the same provider for parallel workflows
-
-### Window Management
-
-- **Drag**: Click title bar to move windows
-- **Resize**: Drag bottom-right corner
-- **Minimize**: Yellow `−` button (window hidden but container runs)
-- **Maximize**: Green `□` button (fullscreen view)
-- **Close**: Red `×` button (stops container permanently)
-- **Bring to Front**: Click any window to focus it
-
-### System Logs
-
-- Click **System Logs** icon (terminal icon) on desktop
-- Opens dedicated window showing all system events
-- **Filter logs**: Click Info/Success/Warning/Error buttons
-- **Clear logs**: Trash icon clears all entries
-- **Auto-scroll**: Toggle to follow latest logs (arrow icon)
-- Monitor container creation, connections, and failures in real-time
-
-### File Browser
-
-- Click **Files** icon (folder icon) on desktop
-- Select a container from dropdown
-- Navigate directories and view files
-- All files persisted in `workspace/containers/`
-
-### Top Navigation Bar
-
-- **ProteOS Logo**: Shows system branding
-- **Settings**: Configure system preferences
-- **Folders**: Quick access to workspace directories
-- **Help**: Documentation and support
-- **Submit Bugs**: Report issues on GitHub
-- **URL Badge**: Current server address (e.g., http://localhost:3001)
-- **System Clock**: Real-time clock display
-
-## 🎯 AI Provider Comparison
-
-| Provider | Model | Context | Image Size | Free Tier |
-|----------|-------|---------|------------|-----------|
-| **🐋 Claude** | 3.5 Sonnet | 200K | 331MB | Usage-based |
-| **🔷 Gemini** | 2.5 Pro | 1M | 651MB | 1K req/day |
-| **⚡ OpenAI** | GPT-4/Codex | varies | 632MB | Pay-as-you-go |
-
-## 📦 Deployment
-
-See [DEPLOYMENT.md](DEPLOYMENT.md) for comprehensive deployment guide including:
-
-- Docker Compose deployment
-- Cloud hosting (AWS, GCP, DigitalOcean)
-- Reverse proxy configuration (nginx, Caddy)
-- Security best practices
-- Production optimization
-- Monitoring and maintenance
-
-## 🛠️ API Endpoints
-
-### Container Management
-
-```http
-# Create container
-POST /api/containers/create
-Content-Type: application/json
-{
-  "name": "My AI Terminal",
-  "type": "claude" | "gemini" | "openai"
-}
-
-# List containers
-GET /api/containers
-
-# Stop container
-DELETE /api/containers/:id
-
-# Get container stats
-GET /api/containers/:id/stats
-```
-
-### File Operations
-
-```http
-# Browse files
-GET /api/containers/:id/files?path=/some/path
-
-# Read file
-GET /api/containers/:id/files/read?path=/file.txt
-```
-
-## 🔒 Security
-
-- **API Keys**: Stored as environment variables, never committed
-- **Docker Socket**: Requires careful consideration in production
-- **File Access**: Restricted to container workspaces only
-- **Network**: Isolated container networks
-- **HTTPS**: Use reverse proxy in production
-
-See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed security guidelines.
-
-## 🐛 Troubleshooting
-
-### Container Won't Start
-```bash
-# Check logs
-docker-compose logs -f
-
-# Verify API keys
-docker-compose exec proteos env | grep API_KEY
-
-# Check Docker
-docker ps
-```
-
-### Terminal Not Loading
-- Wait 5-10 seconds for initialization
-- Check browser console for errors
-- Verify port availability (3000, 7681+)
-- Try refreshing the page
-
-### Permission Issues
-```bash
-# Ensure Docker socket is accessible
-ls -la /var/run/docker.sock
-
-# On Linux, add user to docker group
-sudo usermod -aG docker $USER
-```
-
-## 🗺️ Roadmap
-
-- [x] Multi-AI provider support
-- [x] Persistent file storage
-- [x] File browser and viewer
-- [x] Docker Compose deployment
-- [x] Ocean-themed UI design
-- [x] Lucide icon integration
-- [x] System log viewer window
-- [x] Multiple concurrent instances per provider
-- [x] Dynamic port allocation
-- [x] Glassmorphism effects
-- [ ] User authentication
-- [ ] Container resource monitoring dashboard
-- [ ] Container templates/presets
-- [ ] Mobile responsive design
-- [ ] Theme customization (background images, colors)
-- [ ] Keyboard shortcuts
-- [ ] Session recording/playback
-- [ ] Drag-and-drop file uploads
-- [ ] Terminal command history
-
-## 🤝 Contributing
-
-Contributions welcome! Feel free to:
-
-- Report bugs
-- Suggest features
-- Submit pull requests
-- Improve documentation
-
-## 📄 License
-
-MIT License - See [LICENSE](LICENSE) file
+For {root} sake I'm a designer. Mostly all the code has been writen by chatGPT and *ad latere*.
 
 ## 🙏 Credits
 
@@ -356,11 +102,3 @@ MIT License - See [LICENSE](LICENSE) file
 - [Lucide](https://lucide.dev) for beautiful SVG icons
 
 ---
-
-<div align="center">
-
-**🌊 ProteOS — Shape-shifting AI containers from the depths 🌊**
-
-*"Like Proteus, we adapt. Like the ocean, we contain multitudes."*
-
-</div>
