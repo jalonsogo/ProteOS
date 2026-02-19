@@ -102,3 +102,7 @@ For {root} sake I'm a designer. Mostly all the code has been writen by chatGPT a
 - [Lucide](https://lucide.dev) for beautiful SVG icons
 
 ---
+
+## LOLcense
+
+For {root} sake I'm a designer. Mostly all the code has been written by Claude and ad latere.
